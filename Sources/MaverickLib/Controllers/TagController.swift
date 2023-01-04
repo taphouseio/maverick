@@ -17,7 +17,7 @@ final class TagController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         SiteContentChangeResponderManager.shared.registerResponder(TagCache.shared)
 
-        routes.get("tag", ":tag") { req -> EventLoopFuture<View> in
+        routes.get("tag", ":tag") { req async throws -> View in
             let siteConfig = try SiteConfigController.fetchSite()
 
             let leaf = req.leaf
@@ -25,10 +25,10 @@ final class TagController: RouteCollection {
             let postList = try self.fetchPostsForTag(tag, pageNumber: nil, siteConfig: siteConfig)
             let outputPage = Page(style: .list(list: postList), site: siteConfig,
                                   title: siteConfig.title)
-            return leaf.render("index", outputPage)
+            return try await leaf.render("index", outputPage).get()
         }
 
-        routes.get("tag", ":tag", ":page") { req -> EventLoopFuture<View> in
+        routes.get("tag", ":tag", ":page") { req async throws -> View in
             let siteConfig = try SiteConfigController.fetchSite()
 
             let leaf = req.leaf
@@ -37,7 +37,7 @@ final class TagController: RouteCollection {
             let postList = try self.fetchPostsForTag(tag, pageNumber: page, siteConfig: siteConfig)
             let outputPage = Page(style: .list(list: postList), site: siteConfig,
                                   title: siteConfig.title)
-            return leaf.render("index", outputPage)
+            return try await leaf.render("index", outputPage).get()
         }
     }
 

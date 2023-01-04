@@ -10,7 +10,7 @@ services:
     working_dir: /app
     stdin_open: true
     tty: true
-    entrypoint: make docker-run
+    entrypoint: swift run Maverick serve -b 0.0.0.0
   nginx:
     build:
       context: ./_dev/.tools

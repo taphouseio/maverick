@@ -1,22 +1,22 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 import PackageDescription
 
 let package = Package(
     name: "Maverick",
     platforms: [
-        .macOS(.v10_15), .iOS(.v12),
+        .macOS(.v12), .iOS(.v14),
     ],
     products: [
         .executable(name: "Maverick", targets: ["Maverick"]),
         .library(name: "MaverickModels", targets: ["MaverickModels"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.48.4"),
-        .package(url: "https://github.com/vapor/leaf.git", from: "4.1.2"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.67.5"),
+        .package(url: "https://github.com/vapor/leaf.git", from: "4.2.4"),
         .package(url: "https://github.com/kylef/PathKit.git", from: "0.9.1"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "1.0.0"),
-        .package(name: "SwiftMarkdown", url: "https://github.com/vapor-community/markdown.git", from: "0.6.1"),
-        .package(url: "https://github.com/jsorge/textbundleify.git", .branch("master")),
+        .package(url: "https://github.com/vapor-community/markdown.git", from: "0.7.1"),
+        .package(url: "https://github.com/jsorge/textbundleify.git", branch: "master"),
         .package(url: "https://github.com/JohnSundell/ShellOut.git", from: "2.2.0"),
     ],
     targets: [
@@ -34,14 +34,14 @@ let package = Package(
                 "MaverickModels",
                 "Micropub",
                 "ShellOut",
-                "SwiftMarkdown",
+                .product(name: "SwiftMarkdown", package: "markdown"),
                 .product(name: "TextBundleify", package: "textbundleify"),
                 "PathKit",
                 .product(name: "Vapor", package: "vapor"),
                 "Yams"
             ]
         ),
-        .target(
+        .executableTarget(
             name: "Maverick",
             dependencies: [
                 "MaverickLib"

@@ -26,20 +26,20 @@ struct PostListRouteCollection: RouteCollection {
         }
         
         // Home
-        routes.get("") { req -> EventLoopFuture<View> in
+        routes.get("") { req async throws -> View in
             let config = try SiteConfigController.fetchSite()
             let leaf = req.leaf
             let page = try fetchPostList(for: 1, config: config)
-            return leaf.render("index", page)
+            return try await leaf.render("index", page).get()
         }
         
         // Archive
-        routes.get("page", ":page") { req -> EventLoopFuture<View> in
+        routes.get("page", ":page") { req async throws -> View in
             let config = try SiteConfigController.fetchSite()
             let leaf = req.leaf
             let page = try req.parameters.require("page", as: Int.self)
             let outputPage = try fetchPostList(for: page, config: config)
-            return leaf.render("index", outputPage)
+            return try await leaf.render("index", outputPage).get()
         }
     }
 }

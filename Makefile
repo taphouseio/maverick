@@ -4,7 +4,7 @@
 # Needs packages pkg-config & libressl via homebrew on mac
 # Needs libssl-dev & pkg-config on Linux
 
-CONTAINER ?= jsorge/maverick
+CONTAINER ?= ghcr.io/jsorge/maverick
 TAG       := $$(git describe --tags)
 IMG       := ${CONTAINER}:${TAG}
 LATEST    := ${CONTAINER}:latest
@@ -20,10 +20,6 @@ up:
 .PHONY: down
 down:
 	docker-compose down
-
-.PHONY: docker-run
-docker-run:
-	swift run Maverick serve -b 0.0.0.0
 
 .PHONY: docker-build
 docker-build:

@@ -30,11 +30,11 @@ struct StaticPageRouter: RouteCollection {
 
         let newPages = try pageManager.updatePaths()
         for page in newPages {
-            router.get(PathComponent.constant(page)) { req -> EventLoopFuture<View> in
+            router.get(PathComponent.constant(page)) { req async throws -> View in
                 let leaf = req.leaf
                 let post = try StaticPageController.fetchStaticPage(named: page, in: .pages, for: StaticPageRouter.site!)
                 let outputPage = Page(style: .single(post: post), site: config, title: post.title ?? config.title)
-                return leaf.render("post", outputPage)
+                return try await leaf.render("post", outputPage).get()
             }
         }
         
