@@ -10,8 +10,9 @@ RUN apt-get -qq update && apt-get install -y \
   && rm -r /var/lib/apt/lists/*
 WORKDIR /app
 COPY . .
-RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
-RUN mkdir -p /build/lib && find /usr/lib/swift/linux -name '*.so*' -exec cp {} /build/lib/ \;
+RUN mkdir -p /build/bin /build/lib
+RUN swift build -c release && mv `swift build -c release --show-bin-path`/* /build/bin/
+RUN find /usr/lib/swift/linux -name '*.so*' -exec cp {} /build/lib/ \;
 
 # Production image
 FROM ubuntu:22.04
