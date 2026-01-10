@@ -1,5 +1,5 @@
 # You can set the Swift version to what you need for your app. Versions can be found here: https://hub.docker.com/_/swift
-FROM swift:6.2-noble as build
+FROM swift:6.2-noble AS build
 
 # For local build, add `--build-arg env=docker`
 # In your application, you can use `Environment.custom(name: "docker")` to check if you're in this env
@@ -24,4 +24,4 @@ COPY --from=build /build/bin/Maverick .
 COPY --from=build /build/lib/* /usr/lib/
 
 EXPOSE 8080
-ENTRYPOINT ./Maverick serve -e prod -b 0.0.0.0
+ENTRYPOINT ["./Maverick", "serve", "-e", "prod", "-b", "0.0.0.0"]
