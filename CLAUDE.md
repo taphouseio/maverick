@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Maverick is a Swift-based blog engine built on Vapor 4 that reads content from [textbundle](https://textbundle.org/spec) directories. It's a hybrid between static sites (files on disk) and dynamic sites (server-rendered), with no database required.
 
-**Stack:** Swift 5.7, Vapor 4.67.5, Leaf templating, SwiftMarkdown
+**Stack:** Swift 6.2, Vapor 4.121.0, Leaf templating, SwiftMarkdown
 
 ## Build Commands
 
@@ -18,14 +18,20 @@ swift build -c release         # Release build
 # Test
 swift test                     # Run all tests
 
-# Docker (ghcr.io/jsorge/maverick)
+# Development
+make dev                       # Download dev site (jsorge.net) into _dev/
+make run                       # Run Maverick locally via swift run
+make docker-dev                # Build & run in Docker with nginx
+make docker-dev-down           # Stop Docker dev containers
+
+# Production Docker (ghcr.io/jsorge/maverick)
 make docker-build              # Build container image
 make docker-push               # Push to GitHub Container Registry
-make up                        # Start with docker-compose
-make down                      # Stop containers
 ```
 
 **Dependencies:** On macOS, requires `pkg-config` and `libressl` via Homebrew. On Linux, requires `libssl-dev` and `pkg-config`.
+
+**Docker:** Production image uses `swift:6.2-noble` for building and `ubuntu:24.04` for runtime.
 
 ## Architecture
 
@@ -77,13 +83,31 @@ When feeds change, `SitePinger` notifies configured URLs (micro.blog webhooks).
 
 ## Development Setup
 
-The `_dev/` directory contains a complete development environment with its own `Public/`, `Resources/Views/`, and `SiteConfig.yml`. The root `Public/` and `Resources/` directories are used for production deployments.
+The `_dev/` directory (gitignored) contains a real Maverick site used for development. It's downloaded from the jsorge.net repository via `make dev`.
 
-To run locally:
-```bash
-make dev       # Runs ./tools/update_dev.sh
-make up        # Docker compose up
+**Project structure:**
 ```
+maverick/
+├── Sources/                        # Engine code
+├── Dockerfile                      # Production image only
+├── tools/
+│   ├── update_dev.sh              # Downloads dev site
+│   └── docker-compose_local.yml   # Dev Docker config
+└── _dev/                          # Dev site (.gitignored)
+    ├── Public/_posts/             # Blog content
+    ├── Resources/Views/           # Leaf templates
+    ├── SiteConfig.yml             # Site configuration
+    └── .tools/                    # Site's deployment tooling
+```
+
+**Development workflow:**
+```bash
+make dev          # First time: download dev site into _dev/
+make run          # Run via swift (fastest iteration, no Docker)
+make docker-dev   # Run in Docker with nginx (tests production build)
+```
+
+The `make run` command runs Maverick directly via `swift run`, serving content from `_dev/`. The `make docker-dev` command builds the production Dockerfile and runs it with nginx, useful for testing the Docker build before pushing.
 
 ## Configuration
 
