@@ -11,11 +11,11 @@ on:
 env:
   REGISTRY: ghcr.io
   # Must be lowercase for ghcr.io
-  IMAGE_NAME: jsorge/maverick
+  IMAGE_NAME: taphouseio/maverick
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, X64]
     permissions:
       contents: write
       packages: write
@@ -47,6 +47,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
