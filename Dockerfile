@@ -2,7 +2,8 @@
 FROM swift:6.0.3-jammy AS build
 
 # Disable AVX-512 so the binary runs on older x86_64 hosts.
-ARG SWIFT_LLVM_FLAGS="-mattr=-avx512f"
+ARG SWIFT_LLVM_FLAGS="-mattr=-avx512f,-avx512dq,-avx512cd,-avx512bw,-avx512vl"
+ARG SWIFT_CFLAGS="-Xcc -march=x86-64 -Xcc -mtune=generic"
 
 # For local build, add `--build-arg env=docker`
 # In your application, you can use `Environment.custom(name: "docker")` to check if you're in this env
@@ -14,7 +15,7 @@ RUN apt-get -qq update && apt-get install -y \
 WORKDIR /app
 COPY . .
 RUN mkdir -p /build/bin /build/lib
-RUN SWIFT_FLAGS="-Xswiftc -Xllvm -Xswiftc ${SWIFT_LLVM_FLAGS}" \
+RUN SWIFT_FLAGS="-Xswiftc -Xllvm -Xswiftc ${SWIFT_LLVM_FLAGS} ${SWIFT_CFLAGS}" \
   && swift build -c release ${SWIFT_FLAGS} \
   && BIN_PATH="$(swift build -c release --show-bin-path ${SWIFT_FLAGS})" \
   && mv "${BIN_PATH}"/* /build/bin/
