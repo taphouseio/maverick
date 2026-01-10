@@ -1,6 +1,9 @@
 # You can set the Swift version to what you need for your app. Versions can be found here: https://hub.docker.com/_/swift
 FROM swift:6.0.3-jammy AS build
 
+# Keep the build CPU baseline compatible with older x86_64 hosts.
+ARG SWIFT_TARGET_CPU=x86-64
+
 # For local build, add `--build-arg env=docker`
 # In your application, you can use `Environment.custom(name: "docker")` to check if you're in this env
 # ARG env
@@ -11,7 +14,10 @@ RUN apt-get -qq update && apt-get install -y \
 WORKDIR /app
 COPY . .
 RUN mkdir -p /build/bin /build/lib
-RUN swift build -c release && mv `swift build -c release --show-bin-path`/* /build/bin/
+RUN SWIFT_FLAGS="-Xswiftc -target-cpu -Xswiftc ${SWIFT_TARGET_CPU}" \
+  && swift build -c release ${SWIFT_FLAGS} \
+  && BIN_PATH="$(swift build -c release --show-bin-path ${SWIFT_FLAGS})" \
+  && mv "${BIN_PATH}"/* /build/bin/
 RUN find /usr/lib/swift/linux -name '*.so*' -exec cp {} /build/lib/ \;
 
 # Production image
