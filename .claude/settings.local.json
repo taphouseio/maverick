@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/jsorge/Developer/maverick log --oneline -15)",
+      "Bash(grep:*)"
+    ]
+  }
+}
