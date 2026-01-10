@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  maverick:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: maverick:local
+    restart: on-failure
+    volumes:
+      - ../Public:/app/Public
+      - ../Resources:/app/Resources
+      - ../SiteConfig.yml:/app/SiteConfig.yml
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile-nginx
+      args:
+        build_domain: localhost
+        contact_email: dev@localhost
+    environment:
+      CA_SSL: "false"
+    ports:
+      - 8080:80
+      - 8443:443
+    volumes:
+      - ../Public:/home/maverick/Public
+      - ./nginx/ssl:/var/www/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - maverick

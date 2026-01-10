@@ -76,7 +76,7 @@ private func runRepeatedTask(_ app: Application) {
 
         do {
             try FileProcessor.attemptToLinkImagesToPosts(imagePaths: PathHelper.incomingMediaPath.children())
-            print("Images have been lined to posts from the incoming media path")
+            print("Images have been linked to posts from the incoming media path")
         }
         catch {
             MaverickLogger.shared?.error("Something went wrong linking images to posts: \(error)")

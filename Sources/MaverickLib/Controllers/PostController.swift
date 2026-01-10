@@ -8,7 +8,7 @@
 import Foundation
 import Leaf
 import MaverickModels
-import SwiftMarkdown
+import Markdown
 import Vapor
 
 enum PostControllerError: Error {
@@ -23,20 +23,20 @@ struct SinglePostRouteCollection: RouteCollection {
     }
     
     func boot(routes: RoutesBuilder) throws {
-        func attemptToFindPost(withSlug slug: String, for req: Request) throws -> EventLoopFuture<Response> {
+        @Sendable func attemptToFindPost(withSlug slug: String, for req: Request) async throws -> Response {
             let posts = try PathHelper.pathsForAllPosts()
             guard let filePath = posts.filter({ $0.lastComponentWithoutExtension.contains(slug) }).first,
                 let postPath = PostPath(path: filePath) else {
                 let response = Response(status: .notFound)
-                return req.eventLoop.makeSucceededFuture(response)
+                return response
             }
             
             let urlPath = self.config.url.appendingPathComponent(postPath.asURIPath)
-            let response = req.redirect(to: urlPath.absoluteString, type: .permanent)
-            return req.eventLoop.makeSucceededFuture(response)
+            let response = req.redirect(to: urlPath.absoluteString, redirectType: .permanent)
+            return response
         }
         
-        routes.get(":year", ":month", ":day", ":slug") { req -> EventLoopFuture<Response> in
+        routes.get(":year", ":month", ":day", ":slug") { req async throws -> Response in
             let year = try req.parameters.require("year", as: Int.self)
             let month = try req.parameters.require("month", as: Int.self)
             let day = try req.parameters.require("day", as: Int.self)
@@ -52,22 +52,22 @@ struct SinglePostRouteCollection: RouteCollection {
                 
                 let response = Response()
                 response.headers.contentType = .html
-                return leaf.render("post", outputPage).map { view -> Response in
-                    let data = Data(view.data.readableBytesView)
-                    response.body = Response.Body(data: data)
-                    return response
-                }
+                let view = try await leaf.render("post", outputPage).get()
+
+                let data = Data(view.data.readableBytesView)
+                response.body = Response.Body(data: data)
+                return response
             }
             catch {
-                return try attemptToFindPost(withSlug: path.slug, for: req)
+                return try await attemptToFindPost(withSlug: path.slug, for: req)
             }
         }
         
-        routes.get("draft", ":slug") { req -> EventLoopFuture<Response> in
+        routes.get("draft", ":slug") { req async throws -> Response in
             let leaf = req.leaf
             guard let slug = req.parameters.get("slug") else {
                 let response = Response(status: .notFound)
-                return req.eventLoop.makeSucceededFuture(response)
+                return response
             }
             
             do {
@@ -77,14 +77,13 @@ struct SinglePostRouteCollection: RouteCollection {
                 
                 let response = Response()
                 response.headers.contentType = .html
-                return leaf.render("post", outputPage).map { view -> Response in
-                    let data = Data(view.data.readableBytesView)
-                    response.body = Response.Body(data: data)
-                    return response
-                }
+                let view = try await leaf.render("post", outputPage).get()
+                let data = Data(view.data.readableBytesView)
+                response.body = Response.Body(data: data)
+                return response
             }
             catch {
-                return try attemptToFindPost(withSlug: slug, for: req)
+                return try await attemptToFindPost(withSlug: slug, for: req)
             }
         }
     }
@@ -157,7 +156,7 @@ private extension BasePost {
         \(postHref)
         """)
 
-        output = try markdownToHTML(output)
+        output = HTMLFormatter.format(output)
         return output
     }
 
@@ -175,7 +174,7 @@ private extension BasePost {
         \(postHref)
         """
 
-        output = try markdownToHTML(output)
+        output = HTMLFormatter.format(output)
         return output
     }
 }

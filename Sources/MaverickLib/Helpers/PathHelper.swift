@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PathKit
+@preconcurrency import PathKit
 import Vapor
 
 enum Location: String {
@@ -24,12 +24,13 @@ enum Location: String {
     }
 }
 
-struct PathHelper {
+struct PathHelper: Sendable {
     static func makeBundleAssetsPath(filename: String, location: Location) -> String {
         return "/\(location.rawValue)/\(filename).textbundle"
     }
-    
-    static var root: Path = {
+
+    // Path properties are initialized once at startup and never mutated
+    nonisolated(unsafe) static let root: Path = {
         let root = Path(DirectoryConfiguration.detect().workingDirectory)
 
         if isDebug() {
@@ -38,16 +39,16 @@ struct PathHelper {
 
         return root
     }()
-    
-    static var publicFolderPath: Path = {
+
+    nonisolated(unsafe) static let publicFolderPath: Path = {
         return root + Path("Public")
     }()
-    
-    static var postFolderPath: Path = {
+
+    nonisolated(unsafe) static let postFolderPath: Path = {
         let postsPath = publicFolderPath + Path(Location.posts.rawValue)
         return postsPath
     }()
-    
+
     static func pathsForAllPosts() throws -> [Path] {
         let allPaths = try postFolderPath.children()
             .sorted(by: { $0.lastComponentWithoutExtension > $1.lastComponentWithoutExtension })
@@ -59,15 +60,15 @@ struct PathHelper {
         try incomingMediaPath.mkpath()
     }
 
-    static var incomingFolderPath: Path = {
+    nonisolated(unsafe) static let incomingFolderPath: Path = {
         return publicFolderPath + Path("incoming")
     }()
 
-    static var incomingPostPath: Path = {
+    nonisolated(unsafe) static let incomingPostPath: Path = {
         return incomingFolderPath + Path("posts")
     }()
 
-    static var incomingMediaPath: Path = {
+    nonisolated(unsafe) static let incomingMediaPath: Path = {
         return incomingFolderPath + Path("media")
     }()
 }

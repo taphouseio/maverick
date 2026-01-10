@@ -7,7 +7,7 @@
 
 import Foundation
 import MaverickModels
-import SwiftMarkdown
+import Markdown
 
 let rfc822DateFormatter: DateFormatter = {
     let formatter = DateFormatter()

@@ -7,6 +7,7 @@
 
 import Logging
 
-struct MaverickLogger {
-    static var shared: Logger?
+struct MaverickLogger: Sendable {
+    // Set once during app initialization, then only read - safe for concurrent access
+    nonisolated(unsafe) static var shared: Logger?
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 import MaverickModels
-import SwiftMarkdown
+import Markdown
 
 struct JSONFeedGenerator: FeedGenerator {
     static func makeFeed(from posts: [Post], for site: SiteConfig, goingTo type: TextOutputType)
