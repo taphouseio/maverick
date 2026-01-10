@@ -1,0 +1,35 @@
+[env]
+CONTAINER = "ghcr.io/jsorge/maverick"
+
+# Development tasks
+[tasks.dev]
+description = "Download the dev site (jsorge.net) into _dev/"
+run = "./tools/update_dev.sh"
+
+[tasks.run]
+description = "Run Maverick locally via swift run"
+run = "cd _dev && swift run --package-path .. Maverick serve -b 127.0.0.1"
+
+[tasks.docker-dev]
+description = "Build & run in Docker with nginx (http://localhost:8080)"
+run = """
+cp tools/docker-compose_local.yml _dev/.tools/docker-compose_local.yml
+cd _dev/.tools && docker-compose -f docker-compose_local.yml up --build
+"""
+
+[tasks.docker-dev-down]
+description = "Stop Docker dev containers"
+run = "cd _dev/.tools && docker-compose -f docker-compose_local.yml down"
+
+# Release tasks
+[tasks.release]
+description = "Interactive release: prompts for version, then tags, builds, and pushes"
+run = "bash mise/scripts/release.sh"
+
+[tasks.docker-build]
+description = "Build Docker image. Usage: mise run docker-build [VERSION]"
+run = "bash mise/scripts/docker-build.sh"
+
+[tasks.docker-push]
+description = "Push Docker image. Usage: mise run docker-push [VERSION]"
+run = "bash mise/scripts/docker-push.sh"

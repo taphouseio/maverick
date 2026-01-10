@@ -17,16 +17,24 @@ swift build -c release         # Release build
 
 # Test
 swift test                     # Run all tests
+```
 
-# Development
-make dev                       # Download dev site (jsorge.net) into _dev/
-make run                       # Run Maverick locally via swift run
-make docker-dev                # Build & run in Docker with nginx
-make docker-dev-down           # Stop Docker dev containers
+## Development (via mise)
 
-# Production Docker (ghcr.io/jsorge/maverick)
-make docker-build              # Build container image
-make docker-push               # Push to GitHub Container Registry
+```bash
+mise trust                     # First time: trust the .mise.toml
+mise run dev                   # Download dev site (jsorge.net) into _dev/
+mise run run                   # Run Maverick locally via swift run
+mise run docker-dev            # Build & run in Docker with nginx (localhost:8080)
+mise run docker-dev-down       # Stop Docker dev containers
+```
+
+## Release (via mise)
+
+```bash
+mise run release               # Interactive: prompts for version, builds, tags, pushes
+mise run docker-build 1.0.0    # Build only (with specific version)
+mise run docker-push 1.0.0     # Push only (with specific version)
 ```
 
 **Dependencies:** On macOS, requires `pkg-config` and `libressl` via Homebrew. On Linux, requires `libssl-dev` and `pkg-config`.
@@ -83,13 +91,15 @@ When feeds change, `SitePinger` notifies configured URLs (micro.blog webhooks).
 
 ## Development Setup
 
-The `_dev/` directory (gitignored) contains a real Maverick site used for development. It's downloaded from the jsorge.net repository via `make dev`.
+The `_dev/` directory (gitignored) contains a real Maverick site used for development. It's downloaded from the jsorge.net repository via `mise run dev`.
 
 **Project structure:**
 ```
 maverick/
 ├── Sources/                        # Engine code
 ├── Dockerfile                      # Production image only
+├── .mise.toml                      # Task runner config
+├── mise/scripts/                   # Task scripts (release, docker-build, etc.)
 ├── tools/
 │   ├── update_dev.sh              # Downloads dev site
 │   └── docker-compose_local.yml   # Dev Docker config
@@ -102,12 +112,12 @@ maverick/
 
 **Development workflow:**
 ```bash
-make dev          # First time: download dev site into _dev/
-make run          # Run via swift (fastest iteration, no Docker)
-make docker-dev   # Run in Docker with nginx (tests production build)
+mise run dev          # First time: download dev site into _dev/
+mise run run          # Run via swift (fastest iteration, no Docker)
+mise run docker-dev   # Run in Docker with nginx (tests production build)
 ```
 
-The `make run` command runs Maverick directly via `swift run`, serving content from `_dev/`. The `make docker-dev` command builds the production Dockerfile and runs it with nginx, useful for testing the Docker build before pushing.
+The `mise run run` command runs Maverick directly via `swift run`, serving content from `_dev/`. The `mise run docker-dev` command builds the production Dockerfile and runs it with nginx on http://localhost:8080, useful for testing the Docker build before pushing.
 
 ## Configuration
 
