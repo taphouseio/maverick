@@ -11,7 +11,7 @@ import MaverickModels
 import PathKit
 import Vapor
 
-final class TagController: RouteCollection {
+final class TagController: RouteCollection, Sendable {
     init() {}
 
     func boot(routes: RoutesBuilder) throws {
@@ -107,7 +107,7 @@ final class TagController: RouteCollection {
     }
 }
 
-final class TagCache {
+final class TagCache: @unchecked Sendable {
     private var storage: [Tag: [PostPath]] = [:]
 
     static let shared = TagCache()

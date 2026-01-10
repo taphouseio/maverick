@@ -23,7 +23,7 @@ struct SinglePostRouteCollection: RouteCollection {
     }
     
     func boot(routes: RoutesBuilder) throws {
-        func attemptToFindPost(withSlug slug: String, for req: Request) async throws -> Response {
+        @Sendable func attemptToFindPost(withSlug slug: String, for req: Request) async throws -> Response {
             let posts = try PathHelper.pathsForAllPosts()
             guard let filePath = posts.filter({ $0.lastComponentWithoutExtension.contains(slug) }).first,
                 let postPath = PostPath(path: filePath) else {
@@ -32,7 +32,7 @@ struct SinglePostRouteCollection: RouteCollection {
             }
             
             let urlPath = self.config.url.appendingPathComponent(postPath.asURIPath)
-            let response = req.redirect(to: urlPath.absoluteString, type: .permanent)
+            let response = req.redirect(to: urlPath.absoluteString, redirectType: .permanent)
             return response
         }
         

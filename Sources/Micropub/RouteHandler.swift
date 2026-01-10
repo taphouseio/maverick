@@ -12,7 +12,7 @@ import Vapor
 private let micropubPathComponent = "micropub"
 private let mediaPathComponent = "media"
 
-public struct MicropubRouteHandler: RouteCollection {
+public struct MicropubRouteHandler: RouteCollection, Sendable {
     private let config: MicropubConfig
     public init(config: MicropubConfig) {
         self.config = config

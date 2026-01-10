@@ -8,7 +8,7 @@
 import Foundation
 
 /// Data about the whole site
-public struct SiteConfig: Codable {
+public struct SiteConfig: Codable, Sendable {
     /// Goes in the `meta name=description` tag.
     public let metaDescription: String
     /// The title that goes in the header on the page (i.e. "jsorge.net" or "Inessential").

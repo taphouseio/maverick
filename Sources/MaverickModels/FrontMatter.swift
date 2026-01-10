@@ -12,14 +12,14 @@ public typealias Tag = String
 /// Metadata about a post
 public struct FrontMatter: Codable {
     /// The date format used in all content
-    public static let dateFormatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) public static let dateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [ .withInternetDateTime ]
         return formatter
     }()
 
     /// The original date formatter used for older posts. I think this is the format that Ghost uses.
-    private static let deprecatedFormatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let deprecatedFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [
             .withYear,

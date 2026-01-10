@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git -C /Users/jsorge/Developer/maverick log --oneline -15)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:swiftpackageindex.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(swift package:*)",
+      "Bash(swift build:*)"
     ]
   }
 }

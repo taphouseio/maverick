@@ -8,10 +8,10 @@
 import Foundation
 import Vapor
 
-public typealias NewPostHandler = (_ request: MicropubBlogPostRequest) throws -> String
-public typealias ContentReceivedHandler = (_ content: File?) throws -> String?
+public typealias NewPostHandler = @Sendable (_ request: MicropubBlogPostRequest) throws -> String
+public typealias ContentReceivedHandler = @Sendable (_ content: File?) throws -> String?
 
-public struct MicropubConfig {
+public struct MicropubConfig: Sendable {
     let url: URL
     let newPostHandler: NewPostHandler
     let contentReceivedHandler: ContentReceivedHandler

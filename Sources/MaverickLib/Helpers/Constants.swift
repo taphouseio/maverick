@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Constants {
-    struct App {
-        static var name: String = "Maverick"
-        static var version: String = "0.7"
-        static var fullVersion: String = "\(name) v\(version)"
+struct Constants: Sendable {
+    struct App: Sendable {
+        static let name: String = "Maverick"
+        static let version: String = "0.7"
+        static let fullVersion: String = "\(name) v\(version)"
     }
 }

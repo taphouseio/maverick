@@ -8,11 +8,11 @@
 import Foundation
 import MaverickModels
 
-protocol SiteContentChangeResponder {
+protocol SiteContentChangeResponder: Sendable {
     func respondToSiteContentChange(site: SiteConfig)
 }
 
-final class SiteContentChangeResponderManager {
+final class SiteContentChangeResponderManager: @unchecked Sendable {
     private var responders = [SiteContentChangeResponder]()
 
     static let shared = SiteContentChangeResponderManager()

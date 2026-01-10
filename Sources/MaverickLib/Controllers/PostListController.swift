@@ -19,7 +19,7 @@ struct PostListRouteCollection: RouteCollection {
     }
     
     func boot(routes: RoutesBuilder) throws {
-        func fetchPostList(for page: Int, config: SiteConfig) throws -> Page {
+        @Sendable func fetchPostList(for page: Int, config: SiteConfig) throws -> Page {
             let postList = try PostListController.fetchPostList(forPageNumber: page, config: config)
             let outputPage = Page(style: .list(list: postList), site: config, title: config.title)
             return outputPage

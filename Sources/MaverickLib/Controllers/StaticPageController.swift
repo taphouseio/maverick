@@ -11,10 +11,11 @@ import MaverickModels
 import PathKit
 import Vapor
 
-struct StaticPageRouter: RouteCollection {
-    private static var site: SiteConfig?
-    private static var router: RoutesBuilder?
-    private static var pageManager = StaticPageManager()
+struct StaticPageRouter: RouteCollection, Sendable {
+    // These are set once during boot and accessed from the main server context
+    nonisolated(unsafe) private static var site: SiteConfig?
+    nonisolated(unsafe) private static var router: RoutesBuilder?
+    nonisolated(unsafe) private static var pageManager = StaticPageManager()
     
     init(siteConfig site: SiteConfig) {
         StaticPageRouter.site = site
