@@ -19,15 +19,6 @@
       }
     },
     {
-      "identity" : "cmark-gfm",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/brokenhandsio/cmark-gfm.git",
-      "state" : {
-        "revision" : "e97450a77a40f12b4f88f95891621c3b5d8669de",
-        "version" : "2.1.0"
-      }
-    },
-    {
       "identity" : "console-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/console-kit.git",
@@ -52,15 +43,6 @@
       "state" : {
         "revision" : "c67a1b06561bfb8a427ed7e50e27792e083f2d3e",
         "version" : "1.8.0"
-      }
-    },
-    {
-      "identity" : "markdown",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor-community/markdown.git",
-      "state" : {
-        "revision" : "f0cdf125947c06685ebaef633fd00ae5247a1cfc",
-        "version" : "0.7.1"
       }
     },
     {
@@ -136,6 +118,15 @@
       }
     },
     {
+      "identity" : "swift-cmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-cmark.git",
+      "state" : {
+        "revision" : "5d9bdaa4228b381639fff09403e39a04926e2dbe",
+        "version" : "0.7.1"
+      }
+    },
+    {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
@@ -160,6 +151,15 @@
       "state" : {
         "revision" : "6fe203dc33195667ce1759bf0182975e4653ba1c",
         "version" : "1.4.4"
+      }
+    },
+    {
+      "identity" : "swift-markdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-markdown",
+      "state" : {
+        "revision" : "7d9a5ce307528578dfa777d505496bd5f544ad94",
+        "version" : "0.7.3"
       }
     },
     {

@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:6.2
 import PackageDescription
 
 let package = Package(
@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/leaf.git", from: "4.2.4"),
         .package(url: "https://github.com/kylef/PathKit.git", from: "0.9.1"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "1.0.0"),
-        .package(url: "https://github.com/vapor-community/markdown.git", from: "0.7.1"),
+        .package(url: "https://github.com/swiftlang/swift-markdown", from: "0.7.3"),
         .package(url: "https://github.com/jsorge/textbundleify.git", branch: "master"),
         .package(url: "https://github.com/JohnSundell/ShellOut.git", from: "2.2.0"),
     ],
@@ -34,7 +34,7 @@ let package = Package(
                 "MaverickModels",
                 "Micropub",
                 "ShellOut",
-                .product(name: "SwiftMarkdown", package: "markdown"),
+                .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "TextBundleify", package: "textbundleify"),
                 "PathKit",
                 .product(name: "Vapor", package: "vapor"),
@@ -62,7 +62,7 @@ let package = Package(
             ]
         ),
     ],
-    swiftLanguageVersions: [
+    swiftLanguageModes: [
         .v5,
     ]
 )

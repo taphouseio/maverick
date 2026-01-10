@@ -8,7 +8,7 @@
 import Foundation
 import Leaf
 import MaverickModels
-import SwiftMarkdown
+import Markdown
 import Vapor
 
 enum PostControllerError: Error {
@@ -156,7 +156,7 @@ private extension BasePost {
         \(postHref)
         """)
 
-        output = try markdownToHTML(output)
+        output = HTMLFormatter.format(output)
         return output
     }
 
@@ -174,7 +174,7 @@ private extension BasePost {
         \(postHref)
         """
 
-        output = try markdownToHTML(output)
+        output = HTMLFormatter.format(output)
         return output
     }
 }
