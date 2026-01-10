@@ -29,7 +29,16 @@ mise run docker-dev            # Build & run in Docker with nginx (localhost:808
 mise run docker-dev-down       # Stop Docker dev containers
 ```
 
-## Release (via mise)
+## Release
+
+**Via GitHub Actions (recommended):**
+
+Go to Actions → Release → Run workflow, enter version (e.g., `1.0.0`). This will:
+- Build and push Docker image to ghcr.io/jsorge/maverick:VERSION and :latest
+- Create/overwrite git tag v{VERSION}
+- Create GitHub Release with auto-generated notes
+
+**Via mise (local):**
 
 ```bash
 mise run release               # Interactive: prompts for version, builds, tags, pushes
