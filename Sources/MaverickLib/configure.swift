@@ -6,7 +6,7 @@ import Vapor
 import NIOCore
 
 /// Called before your application initializes.
-public func configure(_ app: Application) throws {
+public func configure(_ app: Application) async throws {
     // Register routes to the router
     try registerRoutes(app)
 
