@@ -9,8 +9,7 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(swift package:*)",
       "Bash(swift build:*)",
-      "WebFetch(domain:thenewstack.io)",
-      "WebFetch(domain:www.infoq.com)"
+      "WebFetch(domain:*)"
     ]
   }
 }
