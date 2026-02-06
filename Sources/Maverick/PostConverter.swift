@@ -1,11 +1,12 @@
 //
 //  PostConverter.swift
-//  App
+//  Maverick
 //
 //  Created by Jared Sorge on 6/6/18.
 //
 
 import Foundation
+import MaverickLib
 import MaverickModels
 import Micropub
 import TextBundleify
@@ -26,7 +27,7 @@ struct PostConverter {
             try? destinationBundlePath.delete()
         }
         try incomingBundlePath.move(destinationBundlePath)
-        
+
         try FeedOutput.makeAllTheFeeds()
         return postPath.asURIPath
     }
@@ -41,7 +42,7 @@ private func makeWholeFileContents(fromMicropub micropub: MicropubBlogPostReques
     ---
     \(micropub.content)
     """
-    
+
     if let photo = micropub.photo {
         content += "\n![](\(photo))"
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum TextOutputType: CaseIterable {
+public enum TextOutputType: CaseIterable, Sendable {
     case fullText
     case microblog
 }

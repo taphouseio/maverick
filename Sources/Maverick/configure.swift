@@ -1,6 +1,7 @@
 import Leaf
 import LeafKit
 import Logging
+import MaverickLib
 import MaverickModels
 import Vapor
 import NIOCore
@@ -20,9 +21,9 @@ public func configure(_ app: Application) async throws {
     } else {
         app.leaf.cache.isEnabled = true
     }
-    
+
     let files: FileMiddleware
-    let workingDir = DirectoryConfiguration.detect().workingDirectory
+    let workingDir = FileManager.default.currentDirectoryPath
     if isDebug() {
         files = FileMiddleware(publicDirectory: "\(workingDir)/_dev/Public")
     }
@@ -40,13 +41,13 @@ public func configure(_ app: Application) async throws {
 
 private enum MaverickLeafProvider {
     static var config: LeafConfiguration {
-        let workingDir = DirectoryConfiguration.detect().workingDirectory
+        let workingDir = FileManager.default.currentDirectoryPath
         let viewsDir: String
         if isDebug() {
-            viewsDir = workingDir + "_dev/Resources/Views"
+            viewsDir = workingDir + "/_dev/Resources/Views"
         }
         else {
-            viewsDir = workingDir + "Resources/Views"
+            viewsDir = workingDir + "/Resources/Views"
         }
 
         let configuration = LeafConfiguration(
@@ -114,4 +115,3 @@ final class MaintenanceLifecycle: LifecycleHandler {
         }
     }
 }
-

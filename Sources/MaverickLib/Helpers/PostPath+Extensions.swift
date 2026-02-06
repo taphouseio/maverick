@@ -12,7 +12,7 @@ import FoundationNetworking
 import MaverickModels
 import PathKit
 
-extension PostPath {
+public extension PostPath {
     init?(path: Path) {
         // ignore hidden files
         guard path.lastComponent.starts(with: ".") == false else { return nil }

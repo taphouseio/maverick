@@ -17,13 +17,13 @@ protocol FeedGenerator {
     static func outputFileName(forType type: TextOutputType) -> String
 }
 
-struct FeedOutput {
+public struct FeedOutput: Sendable {
     /// Generates the conttent of all the feeds
     ///
     /// - Returns: True if the feed content has changed
     /// - Throws: Errors are propagated from implementing other functions that throw
     @discardableResult
-    static func makeAllTheFeeds() throws -> Bool {
+    public static func makeAllTheFeeds() throws -> Bool {
         let site = try SiteConfigController.fetchSite()
 
         var changed = false
@@ -87,8 +87,10 @@ struct FeedOutput {
     }
 }
 
-struct SitePinger: SiteContentChangeResponder {
-    func respondToSiteContentChange(site: SiteConfig) {
+public struct SitePinger: SiteContentChangeResponder {
+    public init() {}
+
+    public func respondToSiteContentChange(site: SiteConfig) {
         guard let pingURLS = site.sitesToPing else { return }
 
         for url in pingURLS {
