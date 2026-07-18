@@ -48,7 +48,7 @@ struct StaticPageController {
                                 for site: SiteConfig) throws -> Post
     {
         let base = try FileReader.attemptToReadFile(named: pageName, in: location)
-        let assetsPath = PathHelper.makeBundleAssetsPath(filename: pageName, location: .pages)
+        let assetsPath = PathHelper.makeBundleAssetsPath(filename: pageName, location: location)
         let formattedContent = try FileProcessor.processMarkdownText(base.content, for: assetsPath)
         
         var postURL = site.url
