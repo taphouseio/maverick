@@ -8,6 +8,7 @@ let package = Package(
     ],
     products: [
         .executable(name: "Maverick", targets: ["Maverick"]),
+        .library(name: "MaverickContent", targets: ["MaverickContent"]),
         .library(name: "MaverickModels", targets: ["MaverickModels"]),
     ],
     dependencies: [
@@ -57,12 +58,23 @@ let package = Package(
             name: "MaverickModels",
                 dependencies: [
                     "PathKit",
+                    "Yams",
                 ]
+        ),
+        .target(
+            name: "MaverickContent",
+            dependencies: [
+                .product(name: "Leaf", package: "leaf"),
+                "MaverickModels",
+                .product(name: "Markdown", package: "swift-markdown"),
+                .product(name: "Vapor", package: "vapor"),
+            ]
         ),
         .testTarget(
             name: "MaverickLibTests",
             dependencies: [
                 "MaverickLib",
+                "MaverickContent",
                 "PathKit",
                 .product(name: "TextBundleify", package: "textbundleify"),
             ]

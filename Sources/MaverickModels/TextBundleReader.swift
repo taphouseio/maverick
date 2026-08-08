@@ -7,6 +7,7 @@
 
 import Foundation
 import PathKit
+import Yams
 
 public enum FileReaderError: Error {
     case unreadableFile(String)
@@ -21,14 +22,54 @@ public struct TextBundleReader {
         let markdown: String = try textPath.read()
         let bundleData: Data = try infoPath.read()
 
-        guard
-            let bundleInfo = BundleInfo(json: bundleData),
-            let frontMatter = bundleInfo.frontMatter else
-        {
+        let frontMatter: FrontMatter
+        let content: String
+        if let bundleInfo = BundleInfo(json: bundleData), let bundledFrontMatter = bundleInfo.frontMatter {
+            frontMatter = bundledFrontMatter
+            content = markdown
+        } else if let legacy = try Self.legacyFrontMatter(in: markdown) {
+            frontMatter = legacy.frontMatter
+            content = legacy.content
+        } else {
             throw FileReaderError.unreadableFile(bundlePath)
         }
 
-        let post = BasePost(frontMatter: frontMatter, content: markdown)
+        let post = BasePost(frontMatter: frontMatter, content: content)
         return post
+    }
+
+    public static func attemptToReadSupportBundle(at bundleURL: URL) throws -> SupportBundle {
+        let path = bundleURL.standardizedFileURL
+        let infoURL = path.appendingPathComponent("info.json", isDirectory: false)
+        let textURL = path.appendingPathComponent("text.md", isDirectory: false)
+
+        let markdown = try String(contentsOf: textURL, encoding: .utf8)
+        let bundleData = try Data(contentsOf: infoURL)
+
+        guard let bundleInfo = BundleInfo(json: bundleData),
+              let metadata = bundleInfo.supportMetadata
+        else {
+            throw FileReaderError.unreadableFile(bundleURL.path)
+        }
+
+        return SupportBundle(
+            metadata: metadata,
+            markdown: markdown,
+            bundleURL: path,
+            assetsURL: path.appendingPathComponent("assets", isDirectory: true)
+        )
+    }
+
+    private static func legacyFrontMatter(in markdown: String) throws -> (frontMatter: FrontMatter, content: String)? {
+        guard markdown.hasPrefix("---\n") || markdown.hasPrefix("---\r\n") else { return nil }
+        let separator = markdown.contains("\r\n") ? "\r\n---\r\n" : "\n---\n"
+        guard let end = markdown.range(of: separator, range: markdown.index(markdown.startIndex, offsetBy: 4)..<markdown.endIndex) else {
+            return nil
+        }
+
+        let yaml = String(markdown[markdown.index(markdown.startIndex, offsetBy: 4)..<end.lowerBound])
+        guard let frontMatter = try? YAMLDecoder().decode(FrontMatter.self, from: yaml) else { return nil }
+        let content = String(markdown[end.upperBound...])
+        return (frontMatter, content)
     }
 }

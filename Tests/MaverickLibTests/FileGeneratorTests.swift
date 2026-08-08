@@ -32,8 +32,11 @@ final class FileGeneratorTests : XCTestCase {
         return path.asFilename
     }
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        try PathHelper.publicFolderPath.mkpath()
+        try PathHelper.postFolderPath.mkpath()
+
         let testMdPath = PathHelper.postFolderPath + Path("\(testFilename).md")
         if testMdPath.exists {
             try? testMdPath.delete()

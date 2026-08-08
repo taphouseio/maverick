@@ -38,6 +38,7 @@ private extension SiteConfig {
         description: This site has not been properly configured
         url: http://example.local
         batchSize: 20
+        feedSize: 20
         """.data(using: .utf8)!
     }
 }
