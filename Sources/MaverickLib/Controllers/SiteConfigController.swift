@@ -10,8 +10,8 @@ import MaverickModels
 import PathKit
 import Yams
 
-struct SiteConfigController {
-    static func fetchSite() throws -> SiteConfig {
+public struct SiteConfigController: Sendable {
+    public static func fetchSite() throws -> SiteConfig {
         let configPath = PathHelper.root + Path("SiteConfig.yml")
         let data: Data
         do {

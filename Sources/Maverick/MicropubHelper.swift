@@ -1,11 +1,12 @@
 //
 //  MicropubHelper.swift
-//  App
+//  Maverick
 //
 //  Created by Jared Sorge on 6/11/18.
 //
 
 import Foundation
+import MaverickLib
 import MaverickModels
 import Micropub
 import PathKit

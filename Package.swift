@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .executable(name: "Maverick", targets: ["Maverick"]),
         .library(name: "MaverickContent", targets: ["MaverickContent"]),
+        .library(name: "MaverickLib", targets: ["MaverickLib"]),
         .library(name: "MaverickModels", targets: ["MaverickModels"]),
     ],
     dependencies: [
@@ -32,26 +33,27 @@ let package = Package(
         .target(
             name: "MaverickLib",
             dependencies: [
-                .product(name: "Leaf", package: "leaf"),
                 "MaverickModels",
-                "Micropub",
-                "ShellOut",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "TextBundleify", package: "textbundleify"),
                 "PathKit",
-                .product(name: "Vapor", package: "vapor"),
                 "Yams",
-
-                // unused in the target but needed to let the dependency be pinned for Sendable-related
-                // reasons. The version attached to Vapor has Swift 6 build errors, but the one in the
-                // package dependencies does not. Hopefully this can go away at some point.
-                .product(name: "MultipartKit", package: "multipart-kit"),
             ]
         ),
         .executableTarget(
             name: "Maverick",
             dependencies: [
-                "MaverickLib"
+                "MaverickLib",
+                "Micropub",
+                "ShellOut",
+                .product(name: "Leaf", package: "leaf"),
+                .product(name: "TextBundleify", package: "textbundleify"),
+                .product(name: "Vapor", package: "vapor"),
+
+                // unused in the target but needed to let the dependency be pinned for Sendable-related
+                // reasons. The version attached to Vapor has Swift 6 build errors, but the one in the
+                // package dependencies does not. Hopefully this can go away at some point.
+                .product(name: "MultipartKit", package: "multipart-kit"),
             ]
         ),
         .target(

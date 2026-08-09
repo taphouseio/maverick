@@ -8,6 +8,6 @@
 import Foundation
 
 // https://blog.wadetregaskis.com/if-debug-in-swift/
-func isDebug() -> Bool {
+public func isDebug() -> Bool {
     return _isDebugAssertConfiguration()
 }

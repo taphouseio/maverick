@@ -1,6 +1,6 @@
 //
 //  AdminController.swift
-//  MaverickLib
+//  Maverick
 //
 //  Created by Jared Sorge on 7/15/19.
 //
@@ -27,7 +27,7 @@ struct AdminRouteCollection: RouteCollection {
 struct AdminController {
     static func reloadActionTriggered() -> Bool {
         do {
-            let workDir = DirectoryConfiguration.detect().workingDirectory
+            let workDir = FileManager.default.currentDirectoryPath
             try shellOut(to: .gitPull(remote: "origin", branch: "master"), at: workDir)
             return true
         }

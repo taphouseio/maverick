@@ -13,15 +13,15 @@ import MaverickModels
 import PathKit
 import Markdown
 
-struct FileProcessor {
-    static func processMarkdownText(_ markdown: Markdown, for urlPath: String) throws -> String {
+public struct FileProcessor: Sendable {
+    public static func processMarkdownText(_ markdown: Markdown, for urlPath: String) throws -> String {
         var processedText = markdown
         processedText = relinkImagesInText(processedText, urlPath: urlPath)
         processedText = HTMLFormatter.format(processedText)
         return processedText
     }
 
-    static func findImagesInText(_ markdown: Markdown) -> [NSTextCheckingResult] {
+    public static func findImagesInText(_ markdown: Markdown) -> [NSTextCheckingResult] {
         // TODO: Can the Markdown.Document type be used to get the images from text instead?
 
         // The \ characters have to be escaped, so the pattern is actually:
@@ -37,7 +37,7 @@ struct FileProcessor {
         return matches
     }
     
-    static func attemptToLinkImagesToPosts(imagePaths paths: [Path]) throws {
+    public static func attemptToLinkImagesToPosts(imagePaths paths: [Path]) throws {
         func textbundleNameThatContainsImage(named filename: String) throws -> String? {
             let task = Process()
             let pipe = Pipe()

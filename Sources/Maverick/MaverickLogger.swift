@@ -1,6 +1,6 @@
 //
 //  MaverickLogger.swift
-//  MaverickLib
+//  Maverick
 //
 //  Created by Jared Sorge on 7/11/18.
 //
