@@ -43,8 +43,11 @@ Go to Actions → Release → Run workflow, enter version (e.g., `1.0.0`). This 
 ```bash
 mise run release               # Interactive: prompts for version, builds, tags, pushes
 mise run docker-build 1.0.0    # Build only (with specific version)
+mise run container-build 1.0.0  # Build the production image locally with Apple Container
 mise run docker-push 1.0.0     # Push only (with specific version)
 ```
+
+`container-build` mirrors the production image build in `.github/workflows/release.yml` without requiring `_dev/`. It uses Apple's `container` command, builds the native `linux/arm64` image by default, tags it with the requested version and `latest`, and does not push either tag. Set `CONTAINER_PLATFORM` explicitly when using a builder that supports another architecture; GitHub Actions continues to build `linux/amd64` for release.
 
 **Dependencies:** On macOS, requires `pkg-config` and `libressl` via Homebrew. On Linux, requires `libssl-dev` and `pkg-config`.
 

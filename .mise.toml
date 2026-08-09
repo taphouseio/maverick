@@ -1,5 +1,5 @@
 [env]
-CONTAINER = "ghcr.io/jsorge/maverick"
+CONTAINER = "ghcr.io/taphouseio/maverick"
 
 # Development tasks
 [tasks.dev]
@@ -29,6 +29,10 @@ run = "bash mise/scripts/release.sh"
 [tasks.docker-build]
 description = "Build Docker image. Usage: mise run docker-build [VERSION]"
 run = "bash mise/scripts/docker-build.sh"
+
+[tasks.container-build]
+description = "Build the production image locally with Apple Container. Usage: mise run container-build [VERSION]"
+run = "bash mise/scripts/container-build.sh"
 
 [tasks.docker-push]
 description = "Push Docker image. Usage: mise run docker-push [VERSION]"
