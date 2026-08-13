@@ -59,16 +59,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Delete remote tag if it exists
-          git push origin :refs/tags/v${{ inputs.version }} || true
+          git push origin :refs/tags/${{ inputs.version }} || true
 
           # Create and push new tag
-          git tag -fa "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          git tag -fa "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
+          git push origin "${{ inputs.version }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ inputs.version }}
-          name: v${{ inputs.version }}
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
           generate_release_notes: true
           make_latest: true

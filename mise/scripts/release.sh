@@ -18,7 +18,7 @@ fi
 # Confirm
 echo ""
 echo "This will:"
-echo "  1. Create git tag v${VERSION}"
+echo "  1. Create git tag ${VERSION}"
 echo "  2. Build Docker image ${CONTAINER}:${VERSION}"
 echo "  3. Push ${CONTAINER}:${VERSION} and ${CONTAINER}:latest"
 echo "  4. Push git tag to origin"
@@ -31,8 +31,8 @@ if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
 fi
 
 echo ""
-echo "==> Creating git tag v${VERSION}..."
-git tag -a "v${VERSION}" -m "Release v${VERSION}"
+echo "==> Creating git tag ${VERSION}..."
+git tag -a "${VERSION}" -m "Release ${VERSION}"
 
 echo "==> Building Docker image..."
 docker build -t "${CONTAINER}:${VERSION}" -t "${CONTAINER}:latest" .
@@ -44,7 +44,7 @@ echo "==> Pushing ${CONTAINER}:latest..."
 docker push "${CONTAINER}:latest"
 
 echo "==> Pushing git tag..."
-git push origin "v${VERSION}"
+git push origin "${VERSION}"
 
 echo ""
-echo "==> Release v${VERSION} complete!"
+echo "==> Release ${VERSION} complete!"
