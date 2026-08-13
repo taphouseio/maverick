@@ -478,6 +478,7 @@ public actor BundleContentStore {
         let relativeComponents = pathPart.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
 
         let candidates: [[String]] = [
+            currentPath.split(separator: "/").map(String.init) + relativeComponents,
             currentDirectory + relativeComponents,
             relativeComponents,
         ]
