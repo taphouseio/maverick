@@ -38,7 +38,7 @@ public struct TextBundleReader {
         return post
     }
 
-    public static func attemptToReadSupportBundle(at bundleURL: URL) throws -> SupportBundle {
+    public static func attemptToReadStaticPageBundle(at bundleURL: URL) throws -> StaticPageBundle {
         let path = bundleURL.standardizedFileURL
         let infoURL = path.appendingPathComponent("info.json", isDirectory: false)
         let textURL = path.appendingPathComponent("text.md", isDirectory: false)
@@ -47,17 +47,21 @@ public struct TextBundleReader {
         let bundleData = try Data(contentsOf: infoURL)
 
         guard let bundleInfo = BundleInfo(json: bundleData),
-              let metadata = bundleInfo.supportMetadata
+              let metadata = bundleInfo.bundleContentMetadata ?? bundleInfo.staticPageMetadata
         else {
             throw FileReaderError.unreadableFile(bundleURL.path)
         }
 
-        return SupportBundle(
+        return StaticPageBundle(
             metadata: metadata,
             markdown: markdown,
             bundleURL: path,
             assetsURL: path.appendingPathComponent("assets", isDirectory: true)
         )
+    }
+
+    public static func attemptToReadBundleContent(at bundleURL: URL) throws -> BundleContentBundle {
+        try attemptToReadStaticPageBundle(at: bundleURL)
     }
 
     private static func legacyFrontMatter(in markdown: String) throws -> (frontMatter: FrontMatter, content: String)? {

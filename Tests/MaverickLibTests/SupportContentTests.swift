@@ -3,7 +3,7 @@ import MaverickContent
 import MaverickModels
 import XCTest
 
-final class SupportContentTests: XCTestCase {
+final class BundleContentTests: XCTestCase {
     private var root: URL!
 
     override func setUpWithError() throws {
@@ -21,17 +21,17 @@ final class SupportContentTests: XCTestCase {
     func testNestedContentRendersAndRewritesBundleAssets() async throws {
         try writeBundle(
             at: "index",
-            metadata: SupportArticleMetadata(title: "Arborist Help"),
+            metadata: BundleContentMetadata(title: "Arborist Help"),
             markdown: "Start here."
         )
         try writeBundle(
             at: "getting-started/index",
-            metadata: SupportArticleMetadata(title: "Getting Started", order: 10),
+            metadata: BundleContentMetadata(title: "Getting Started", order: 10),
             markdown: "Choose a guide."
         )
         try writeBundle(
             at: "getting-started/install",
-            metadata: SupportArticleMetadata(title: "Install Arborist", order: 10),
+            metadata: BundleContentMetadata(title: "Install Arborist", order: 10),
             markdown: "![Screenshot](assets/screenshot.png)\n\n[Download](assets/guide.pdf)"
         )
 
@@ -43,29 +43,29 @@ final class SupportContentTests: XCTestCase {
         let target = try await store.renderTarget(for: "getting-started/install")
 
         XCTAssertEqual(target.template, "article")
-        XCTAssertEqual(target.context.article.title, "Install Arborist")
-        XCTAssertTrue(target.context.article.contentHTML.contains("_asset"))
-        XCTAssertTrue(target.context.article.contentHTML.contains("guide.pdf"))
-        XCTAssertEqual(target.context.breadcrumbs.map(\.title), ["Help", "Getting Started", "Install Arborist"])
+        XCTAssertEqual(target.context.title, "Install Arborist")
+        XCTAssertTrue(target.context.contentHTML.contains("_asset"))
+        XCTAssertTrue(target.context.contentHTML.contains("guide.pdf"))
+        XCTAssertEqual(target.context.breadcrumbs.map(\.title), ["Home", "Getting Started", "Install Arborist"])
     }
 
     func testInvalidUpdateKeepsLastValidSnapshot() async throws {
-        try writeBundle(at: "index", metadata: SupportArticleMetadata(title: "Help"), markdown: "Original")
+        try writeBundle(at: "index", metadata: BundleContentMetadata(title: "Help"), markdown: "Original")
         let store = try makeStore()
         _ = try await store.renderTarget(for: "")
 
-        try writeBundle(at: "getting-started", metadata: SupportArticleMetadata(title: "First"), markdown: "Valid")
-        try writeBundle(at: "getting-started/index", metadata: SupportArticleMetadata(title: "Duplicate"), markdown: "Invalid")
+        try writeBundle(at: "getting-started", metadata: BundleContentMetadata(title: "First"), markdown: "Valid")
+        try writeBundle(at: "getting-started/index", metadata: BundleContentMetadata(title: "Duplicate"), markdown: "Invalid")
 
         let target = try await store.renderTarget(for: "")
-        XCTAssertEqual(target.context.article.title, "Help")
+        XCTAssertEqual(target.context.title, "Help")
     }
 
     func testDraftsAreNotPublished() async throws {
-        try writeBundle(at: "index", metadata: SupportArticleMetadata(title: "Help"), markdown: "Help")
+        try writeBundle(at: "index", metadata: BundleContentMetadata(title: "Help"), markdown: "Help")
         try writeBundle(
             at: "draft",
-            metadata: SupportArticleMetadata(title: "Draft", draft: true),
+            metadata: BundleContentMetadata(title: "Draft", draft: true),
             markdown: "Draft"
         )
 
@@ -74,35 +74,36 @@ final class SupportContentTests: XCTestCase {
     }
 
     func testAssetTraversalIsRejected() async throws {
-        try writeBundle(at: "index", metadata: SupportArticleMetadata(title: "Help"), markdown: "Help")
+        try writeBundle(at: "index", metadata: BundleContentMetadata(title: "Help"), markdown: "Help")
         let store = try makeStore()
 
         do {
-            _ = try await store.asset(bundlePath: "", assetPath: "../secret.txt")
+            _ = try await store.asset(pagePath: "", assetPath: "../secret.txt")
             XCTFail("Expected traversal to be rejected")
-        } catch let error as SupportContentError {
+        } catch let error as BundleContentError {
             XCTAssertEqual(error, .invalidAsset("../secret.txt"))
         }
     }
 
-    private func makeStore() throws -> SupportContentStore {
-        let configuration = try SupportContentConfiguration(
+    private func makeStore() throws -> BundleContentStore {
+        let configuration = try BundleContentConfiguration(
             contentRoot: root,
             routePath: ["arborist", "help"],
+            pageTemplate: "article",
             indexTemplate: "index",
             sectionTemplate: "section",
             articleTemplate: "article"
         )
-        return SupportContentStore(configuration: configuration)
+        return BundleContentStore(configuration: configuration)
     }
 
-    private func writeBundle(at relativePath: String, metadata: SupportArticleMetadata, markdown: String) throws {
+    private func writeBundle(at relativePath: String, metadata: BundleContentMetadata, markdown: String) throws {
         let bundle = bundleURL(for: relativePath)
         try FileManager.default.createDirectory(
             at: bundle.appendingPathComponent("assets", isDirectory: true),
             withIntermediateDirectories: true
         )
-        try BundleInfo.defaultWithSupportMetadata(metadata).toData().write(
+        try BundleInfo.defaultWithBundleContentMetadata(metadata).toData().write(
             to: bundle.appendingPathComponent("info.json")
         )
         try Data(markdown.utf8).write(to: bundle.appendingPathComponent("text.md"))
