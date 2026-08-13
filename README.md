@@ -12,58 +12,37 @@ Maverick is built on top of the [Vapor](https://vapor.codes) framework. Inside o
 
 The presentation is done via the [Leaf](https://docs.vapor.codes/3.0/leaf/basics/) templating syntax. There are 2 templates: `index.leaf` and `post.leaf`. The site can be customized by changing those templates, and the `styles`, `scripts`, and `fonts` folders inside of `Public`.
 
-## Support Content
+## Bundle-backed Content
 
-Maverick also provides a reusable `MaverickContent` library for Git-backed support documentation. Support content is stored as nested textbundles and does not require dates or date-based filenames:
+The content library can mount any textbundle tree as a path-addressable collection: documentation, a wiki, product notes, legal pages, or another site-defined content type. It can also mount one specific textbundle at one route. Bundle content uses the `io_taphouse_maverick_content` metadata namespace:
 
 ```text
-Resources/Support/arborist/
-  index.textbundle/
+Resources/Pages/
+  privacy.textbundle/
     info.json
     text.md
-  getting-started/
-    index.textbundle/
-    install.textbundle/
+  terms.textbundle/
+    info.json
+    text.md
 ```
 
-Each bundle contains `info.json` and `text.md`. Images and downloadable files may be placed in a bundle-local `assets` directory. The support metadata is stored under `io_taphouse_maverick_support` in `info.json`:
-
-```json
-{
-  "version": 2,
-  "type": "net.daringfireball.markdown",
-  "transient": false,
-  "io_taphouse_maverick_support": {
-    "title": "Install Arborist",
-    "description": "Install and launch Arborist.",
-    "updatedAt": "2026-08-07T12:00:00Z",
-    "order": 10,
-    "navTitle": "Install",
-    "draft": false,
-    "tags": ["getting-started"]
-  }
-}
-```
-
-Support routes, navigation, breadcrumbs, previous/next links, Markdown rendering, and asset validation are provided by Maverick. The consuming Vapor application supplies the Leaf templates, site shell, CSS, and final view context. For example:
+Register a `BundleContentRouteCollection` and provide the consuming site’s Leaf template and view context:
 
 ```swift
-let configuration = try SupportContentConfiguration(
-    contentRoot: URL(fileURLWithPath: "Resources/Support/arborist"),
-    routePath: ["arborist", "help"],
-    indexTemplate: "support-index",
-    sectionTemplate: "support-section",
-    articleTemplate: "support-article"
+let configuration = try BundleContentConfiguration(
+    contentRoot: URL(fileURLWithPath: "Resources/Pages"),
+    routePath: ["wiki"],
+    pageTemplate: "wiki-page"
 )
 
-try app.register(collection: SupportRouteCollection(configuration: configuration) { support in
-    MySiteViewContext(support: support)
+try app.register(collection: BundleContentRouteCollection(configuration: configuration) { page in
+    MySiteViewContext(bundleContent: page)
 })
 ```
 
-The root `index.textbundle` maps to the configured route (`/arborist/help` above). A nested `index.textbundle` defines a section, while other bundles define articles. Draft articles are excluded unless `includeDrafts` is enabled.
+For a single bundle, use `BundleContentConfiguration(bundleURL:routePath:pageTemplate:)`. Maverick provides the typed content context, Markdown HTML, live reload, bundle-local asset handling, and rewriting of links to other bundles in the same collection. Relative Markdown links are resolved against the current bundle, while links to external URLs are left unchanged.
 
-Support content is cached as a validated snapshot. The store detects changes to the content tree and reloads it on demand, so a running site can observe new or edited articles without a rebuild or restart. If an update is invalid, the previous valid snapshot remains active. Asset links beginning with `assets/` or `./assets/` are served only from the corresponding bundle’s `assets` directory; traversal and symlink escapes are rejected.
+The consuming application remains responsible for the Leaf template, site shell, styling, navigation presentation, and metadata markup. `MaverickMarkdownTag` is also available for templates that need to render Markdown supplied directly by the application. Support/help navigation is an optional site-level layer built on top of the same bundle model.
 
 Future plans include full API support for [micropub](https://micropub.net) and [XML-RPC](http://xmlrpc.scripting.com). I want Maverick to work exceptionally well with microblogs, and it will support title-less posts. I hope to also make things like publishing from clients such as the [Micro.blog](https://micro.blog) app or [Ulysses](https://ulyssesapp.com) work seamlessly.
 
