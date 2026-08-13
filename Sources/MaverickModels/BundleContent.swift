@@ -1,6 +1,6 @@
 import Foundation
 
-public struct StaticPageMetadata: Codable, Equatable, Sendable {
+public struct BundleContentMetadata: Codable, Equatable, Sendable {
     public let title: String
     public let description: String?
     public let updatedAt: Date?
@@ -49,24 +49,19 @@ public struct StaticPageMetadata: Codable, Equatable, Sendable {
     }
 }
 
-public struct StaticPageBundle: Sendable {
-    public let metadata: StaticPageMetadata
+public struct BundleContentBundle: Sendable {
+    public let metadata: BundleContentMetadata
     public let markdown: String
     public let bundleURL: URL
     public let assetsURL: URL
 
-    public init(metadata: StaticPageMetadata, markdown: String, bundleURL: URL, assetsURL: URL) {
+    public init(metadata: BundleContentMetadata, markdown: String, bundleURL: URL, assetsURL: URL) {
         self.metadata = metadata
         self.markdown = markdown
         self.bundleURL = bundleURL
         self.assetsURL = assetsURL
     }
 }
-
-/// Metadata shared by any bundle-backed page, whether it is a wiki page,
-/// legal page, documentation page, or another site-defined content type.
-public typealias BundleContentMetadata = StaticPageMetadata
-public typealias BundleContentBundle = StaticPageBundle
 
 private extension KeyedDecodingContainer {
     func decodeMaverickDateIfPresent(forKey key: Key) throws -> Date? {

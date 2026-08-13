@@ -3,7 +3,7 @@ import MaverickContent
 import MaverickModels
 import XCTest
 
-final class StaticContentTests: XCTestCase {
+final class BundleContentTests: XCTestCase {
     private var root: URL!
 
     override func setUpWithError() throws {
@@ -21,10 +21,10 @@ final class StaticContentTests: XCTestCase {
     func testPageRendersAndRewritesBundleAssets() async throws {
         try writeBundle(
             at: "privacy",
-            metadata: StaticPageMetadata(title: "Privacy", description: "Our privacy policy"),
+            metadata: BundleContentMetadata(title: "Privacy", description: "Our privacy policy"),
             markdown: "# Privacy\n\n![Logo](assets/logo.png)\n\n[Terms](terms)"
         )
-        try writeBundle(at: "terms", metadata: StaticPageMetadata(title: "Terms"), markdown: "# Terms")
+        try writeBundle(at: "terms", metadata: BundleContentMetadata(title: "Terms"), markdown: "# Terms")
         try Data("image".utf8).write(to: bundleURL(for: "privacy").appendingPathComponent("assets/logo.png"))
 
         let store = try makeStore()
@@ -52,7 +52,7 @@ final class StaticContentTests: XCTestCase {
     }
 
     func testInvalidUpdateKeepsLastValidSnapshot() async throws {
-        try writeBundle(at: "privacy", metadata: StaticPageMetadata(title: "Privacy"), markdown: "Original")
+        try writeBundle(at: "privacy", metadata: BundleContentMetadata(title: "Privacy"), markdown: "Original")
         let store = try makeStore()
         _ = try await store.renderTarget(for: "privacy")
 
@@ -66,41 +66,41 @@ final class StaticContentTests: XCTestCase {
     }
 
     func testDraftsAreNotPublished() async throws {
-        try writeBundle(at: "draft", metadata: StaticPageMetadata(title: "Draft", draft: true), markdown: "Draft")
+        try writeBundle(at: "draft", metadata: BundleContentMetadata(title: "Draft", draft: true), markdown: "Draft")
         let store = try makeStore()
 
         do {
             _ = try await store.renderTarget(for: "draft")
             XCTFail("Expected draft to be hidden")
-        } catch let error as StaticContentError {
+        } catch let error as BundleContentError {
             XCTAssertEqual(error, .notFound("draft"))
         }
     }
 
     func testAssetTraversalIsRejected() async throws {
-        try writeBundle(at: "privacy", metadata: StaticPageMetadata(title: "Privacy"), markdown: "Privacy")
+        try writeBundle(at: "privacy", metadata: BundleContentMetadata(title: "Privacy"), markdown: "Privacy")
         let store = try makeStore()
 
         do {
             _ = try await store.asset(pagePath: "privacy", assetPath: "../secret.txt")
             XCTFail("Expected traversal to be rejected")
-        } catch let error as StaticContentError {
+        } catch let error as BundleContentError {
             XCTAssertEqual(error, .invalidAsset("../secret.txt"))
         }
     }
 
-    private func makeStore() throws -> StaticContentStore {
-        let configuration = try StaticContentConfiguration(contentRoot: root, pageTemplate: "legal")
-        return StaticContentStore(configuration: configuration)
+    private func makeStore() throws -> BundleContentStore {
+        let configuration = try BundleContentConfiguration(contentRoot: root, pageTemplate: "legal")
+        return BundleContentStore(configuration: configuration)
     }
 
-    private func writeBundle(at relativePath: String, metadata: StaticPageMetadata, markdown: String) throws {
+    private func writeBundle(at relativePath: String, metadata: BundleContentMetadata, markdown: String) throws {
         let bundle = bundleURL(for: relativePath)
         try FileManager.default.createDirectory(
             at: bundle.appendingPathComponent("assets", isDirectory: true),
             withIntermediateDirectories: true
         )
-        try BundleInfo.defaultWithStaticPageMetadata(metadata).toData().write(to: bundle.appendingPathComponent("info.json"))
+        try BundleInfo.defaultWithBundleContentMetadata(metadata).toData().write(to: bundle.appendingPathComponent("info.json"))
         try Data(markdown.utf8).write(to: bundle.appendingPathComponent("text.md"))
     }
 
