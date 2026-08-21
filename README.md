@@ -42,6 +42,25 @@ try app.register(collection: BundleContentRouteCollection(configuration: configu
 
 For a single bundle, use `BundleContentConfiguration(bundleURL:routePath:pageTemplate:)`. Maverick provides the typed content context, Markdown HTML, live reload, bundle-local asset handling, and rewriting of links to other bundles in the same collection. Relative Markdown links are resolved against the current bundle, while links to external URLs are left unchanged.
 
+Navigation items expose the bundle's complete typed metadata at `item.metadata`. Applications can add site-specific metadata without changing Maverick by placing arbitrary JSON values in the namespaced `extensions` object:
+
+```json
+{
+  "io_taphouse_maverick_content": {
+    "title": "Repository Commands",
+    "description": "Create and run shell commands for each repository.",
+    "order": 30,
+    "extensions": {
+      "supportType": "guide",
+      "featured": true,
+      "audiences": ["customers", "developers"]
+    }
+  }
+}
+```
+
+Leaf templates can read the standard description with `#(item.metadata.description)` and application-specific values with expressions such as `#(item.metadata.extensions.supportType)`. Extension keys intended for Leaf access should use identifier-friendly names such as `supportType` rather than names containing hyphens.
+
 The consuming application remains responsible for the Leaf template, site shell, styling, navigation presentation, and metadata markup. `MaverickMarkdownTag` is also available for templates that need to render Markdown supplied directly by the application. Support/help navigation is an optional site-level layer built on top of the same bundle model.
 
 Future plans include full API support for [micropub](https://micropub.net) and [XML-RPC](http://xmlrpc.scripting.com). I want Maverick to work exceptionally well with microblogs, and it will support title-less posts. I hope to also make things like publishing from clients such as the [Micro.blog](https://micro.blog) app or [Ulysses](https://ulyssesapp.com) work seamlessly.

@@ -21,6 +21,7 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-markdown", from: "0.7.3"),
         .package(url: "https://github.com/jsorge/textbundleify.git", from: "0.1.0"),
         .package(url: "https://github.com/JohnSundell/ShellOut.git", from: "2.2.0"),
+        .package(url: "https://github.com/edonv/JSONValue.git", from: "1.1.4"),
     ],
     targets: [
         .target(
@@ -58,10 +59,11 @@ let package = Package(
         ),
         .target(
             name: "MaverickModels",
-                dependencies: [
-                    "PathKit",
-                    "Yams",
-                ]
+            dependencies: [
+                .product(name: "JSONValue", package: "JSONValue"),
+                "PathKit",
+                "Yams",
+            ]
         ),
         .target(
             name: "MaverickContent",

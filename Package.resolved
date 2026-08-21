@@ -1,5 +1,5 @@
 {
-  "originHash" : "a328a5be688211de625cd5175c2e1e1d026eabe8903605482ae1759e7e1f9a15",
+  "originHash" : "d4bc5d0b600d25c05a56aa6555adfe39a6855fa470b846a6227a4f4aa0f1ec70",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "32ad16dfc7677b927b225595ed18f3debb32f577",
         "version" : "4.16.0"
+      }
+    },
+    {
+      "identity" : "jsonvalue",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/edonv/JSONValue.git",
+      "state" : {
+        "revision" : "242fa6c97b74836b1fc606ae067645c85fcbdea2",
+        "version" : "1.1.4"
       }
     },
     {

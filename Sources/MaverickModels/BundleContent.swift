@@ -1,4 +1,5 @@
 import Foundation
+import JSONValue
 
 public struct BundleContentMetadata: Codable, Equatable, Sendable {
     public let title: String
@@ -8,6 +9,7 @@ public struct BundleContentMetadata: Codable, Equatable, Sendable {
     public let navTitle: String?
     public let draft: Bool
     public let tags: [String]
+    public let extensions: [String: JSONValue]
 
     public init(
         title: String,
@@ -16,7 +18,8 @@ public struct BundleContentMetadata: Codable, Equatable, Sendable {
         order: Int = 0,
         navTitle: String? = nil,
         draft: Bool = false,
-        tags: [String] = []
+        tags: [String] = [],
+        extensions: [String: JSONValue] = [:]
     ) {
         self.title = title
         self.description = description
@@ -25,6 +28,7 @@ public struct BundleContentMetadata: Codable, Equatable, Sendable {
         self.navTitle = navTitle
         self.draft = draft
         self.tags = tags
+        self.extensions = extensions
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -35,6 +39,7 @@ public struct BundleContentMetadata: Codable, Equatable, Sendable {
         case navTitle
         case draft
         case tags
+        case extensions
     }
 
     public init(from decoder: Decoder) throws {
@@ -46,6 +51,7 @@ public struct BundleContentMetadata: Codable, Equatable, Sendable {
         self.navTitle = try container.decodeIfPresent(String.self, forKey: .navTitle)
         self.draft = try container.decodeIfPresent(Bool.self, forKey: .draft) ?? false
         self.tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+        self.extensions = try container.decodeIfPresent([String: JSONValue].self, forKey: .extensions) ?? [:]
     }
 }
 
