@@ -51,6 +51,27 @@ final class BundleContentTests: XCTestCase {
         XCTAssertEqual(target.context.title, "Privacy")
     }
 
+    func testNavigationIncludesBundleDescriptions() async throws {
+        try writeBundle(
+            at: "privacy",
+            metadata: BundleContentMetadata(title: "Privacy", description: "How personal data is handled."),
+            markdown: "Privacy"
+        )
+        try writeBundle(
+            at: "terms",
+            metadata: BundleContentMetadata(title: "Terms"),
+            markdown: "Terms"
+        )
+
+        let store = try makeStore()
+        let target = try await store.renderTarget(for: "privacy")
+        let privacy = try XCTUnwrap(target.context.navigation.first { $0.path == "privacy" })
+        let terms = try XCTUnwrap(target.context.navigation.first { $0.path == "terms" })
+
+        XCTAssertEqual(privacy.description, "How personal data is handled.")
+        XCTAssertNil(terms.description)
+    }
+
     func testInvalidUpdateKeepsLastValidSnapshot() async throws {
         try writeBundle(at: "privacy", metadata: BundleContentMetadata(title: "Privacy"), markdown: "Original")
         let store = try makeStore()
