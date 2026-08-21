@@ -17,7 +17,7 @@ public struct BundleContentLink: Encodable, Equatable, Sendable {
 
 public struct BundleContentNavigationItem: Encodable, Equatable, Sendable {
     public let title: String
-    public let description: String?
+    public let metadata: BundleContentMetadata
     public let path: String
     public let url: String
     public let children: [BundleContentNavigationItem]
@@ -29,10 +29,10 @@ public struct BundleContentNavigationItem: Encodable, Equatable, Sendable {
         url: String,
         children: [BundleContentNavigationItem],
         isCurrent: Bool,
-        description: String? = nil
+        metadata: BundleContentMetadata? = nil
     ) {
         self.title = title
-        self.description = description
+        self.metadata = metadata ?? BundleContentMetadata(title: title)
         self.path = path
         self.url = url
         self.children = children
@@ -421,7 +421,7 @@ public actor BundleContentStore {
                     url: Self.contentURL(configuration: configuration, path: record.path),
                     children: navigationItems(from: records, parent: record.path, currentPath: currentPath),
                     isCurrent: record.path == currentPath,
-                    description: record.bundle.metadata.description
+                    metadata: record.bundle.metadata
                 )
             }
     }

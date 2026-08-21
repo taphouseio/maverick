@@ -1,4 +1,5 @@
 import Foundation
+import JSONValue
 import MaverickContent
 import MaverickModels
 import XCTest
@@ -51,10 +52,18 @@ final class BundleContentTests: XCTestCase {
         XCTAssertEqual(target.context.title, "Privacy")
     }
 
-    func testNavigationIncludesBundleDescriptions() async throws {
+    func testNavigationIncludesBundleMetadataAndExtensions() async throws {
         try writeBundle(
             at: "privacy",
-            metadata: BundleContentMetadata(title: "Privacy", description: "How personal data is handled."),
+            metadata: BundleContentMetadata(
+                title: "Privacy",
+                description: "How personal data is handled.",
+                extensions: [
+                    "supportType": .string("guide"),
+                    "featured": .bool(true),
+                    "audiences": .array([.string("customers"), .string("developers")]),
+                ]
+            ),
             markdown: "Privacy"
         )
         try writeBundle(
@@ -68,8 +77,15 @@ final class BundleContentTests: XCTestCase {
         let privacy = try XCTUnwrap(target.context.navigation.first { $0.path == "privacy" })
         let terms = try XCTUnwrap(target.context.navigation.first { $0.path == "terms" })
 
-        XCTAssertEqual(privacy.description, "How personal data is handled.")
-        XCTAssertNil(terms.description)
+        XCTAssertEqual(privacy.metadata.description, "How personal data is handled.")
+        XCTAssertEqual(privacy.metadata.extensions["supportType"], .string("guide"))
+        XCTAssertEqual(privacy.metadata.extensions["featured"], .bool(true))
+        XCTAssertEqual(
+            privacy.metadata.extensions["audiences"],
+            .array([.string("customers"), .string("developers")])
+        )
+        XCTAssertNil(terms.metadata.description)
+        XCTAssertTrue(terms.metadata.extensions.isEmpty)
     }
 
     func testInvalidUpdateKeepsLastValidSnapshot() async throws {
