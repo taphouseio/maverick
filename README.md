@@ -67,6 +67,8 @@ Future plans include full API support for [micropub](https://micropub.net) and [
 
 Feeds will be generated with full text and truncated variants, in both [RSS](https://en.wikipedia.org/wiki/RSS) and [JSONFeed](https://jsonfeed.org). These can be used to send your content anywhere you want on the web.
 
+Maverick can also publish long-form posts directly to Bluesky, Mastodon, and LinkedIn with per-provider templates and an encrypted Cloudflare R2 delivery ledger. See [Post broadcasting](Docs/Broadcasting.md) for configuration, authorization, safety, and migration details.
+
 ## Should I Use It?
 
 Probably not yet. It's at a very early stage of development, and built to scratch my own itch and migrate from my current Ghost blog. But if it's up your alley feel free to check it out.

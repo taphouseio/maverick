@@ -32,7 +32,8 @@ public struct PostController: Sendable {
                         title: title,
                         content: formattedContent,
                         frontMatter: base.frontMatter,
-                        path: path)
+                        path: path,
+                        broadcastMetadata: base.broadcastMetadata)
         return post
     }
 

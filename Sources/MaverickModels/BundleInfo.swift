@@ -13,6 +13,7 @@ public struct BundleInfo: Codable {
     public let transient: Bool?
     public var frontMatter: FrontMatter?
     public var bundleContentMetadata: BundleContentMetadata?
+    public var broadcastMetadata: BroadcastMetadata?
     public var creatorURL: String?
     public var creatorIdentifier: String?
 
@@ -22,6 +23,7 @@ public struct BundleInfo: Codable {
         case transient
         case frontMatter = "io_taphouse_maverick"
         case bundleContentMetadata = "io_taphouse_maverick_content"
+        case broadcastMetadata = "io_taphouse_maverick_broadcast"
         case creatorURL
         case creatorIdentifier
     }
@@ -30,7 +32,8 @@ public struct BundleInfo: Codable {
 extension BundleInfo {
     public static var defaultTemplate: BundleInfo {
         return BundleInfo(version: 2, type: "net.daringfireball.markdown", transient: false,
-                          frontMatter: nil, bundleContentMetadata: nil, creatorURL: nil, creatorIdentifier: nil)
+                          frontMatter: nil, bundleContentMetadata: nil, broadcastMetadata: nil,
+                          creatorURL: nil, creatorIdentifier: nil)
     }
 
     public static func defaultWithFrontMatter(_ frontMatter: FrontMatter) -> BundleInfo {
@@ -41,7 +44,8 @@ extension BundleInfo {
 
     public static func defaultWithBundleContentMetadata(_ metadata: BundleContentMetadata) -> BundleInfo {
         return BundleInfo(version: 2, type: "net.daringfireball.markdown", transient: false,
-                          frontMatter: nil, bundleContentMetadata: metadata, creatorURL: nil, creatorIdentifier: nil)
+                          frontMatter: nil, bundleContentMetadata: metadata, broadcastMetadata: nil,
+                          creatorURL: nil, creatorIdentifier: nil)
     }
 
     public init?(json data: Data) {

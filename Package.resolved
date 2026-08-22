@@ -1,5 +1,5 @@
 {
-  "originHash" : "d4bc5d0b600d25c05a56aa6555adfe39a6855fa470b846a6227a4f4aa0f1ec70",
+  "originHash" : "601871133d2a433dca9fd2ed8d7328b9886614a696c8798d466ee5b2de10c761",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -17,6 +17,24 @@
       "state" : {
         "revision" : "6bbb83cbf9d886623a967a965c8fb1b73e6566f9",
         "version" : "1.22.0"
+      }
+    },
+    {
+      "identity" : "aws-crt-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awslabs/aws-crt-swift",
+      "state" : {
+        "revision" : "d1678252cb3da2d34f70db43e402927360df4d8c",
+        "version" : "0.64.1"
+      }
+    },
+    {
+      "identity" : "aws-sdk-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awslabs/aws-sdk-swift.git",
+      "state" : {
+        "revision" : "abb49d27d3fd4a9f03ac2abe4d8e917ba4ebce77",
+        "version" : "1.7.67"
       }
     },
     {
@@ -92,6 +110,15 @@
       }
     },
     {
+      "identity" : "smithy-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/smithy-lang/smithy-swift.git",
+      "state" : {
+        "revision" : "d55aa01ea4df405dd84b5aa66da1476c5ec552be",
+        "version" : "0.246.0"
+      }
+    },
+    {
       "identity" : "spectre",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kylef/Spectre.git",
@@ -107,6 +134,15 @@
       "state" : {
         "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
         "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
       }
     },
     {
@@ -177,8 +213,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-crypto.git",
       "state" : {
-        "revision" : "47d3869a7291f085c1fb9fb1e6d3b97a793f45c6",
-        "version" : "4.5.1"
+        "revision" : "95ba0316a9b733e92bb6b071255ff46263bbe7dc",
+        "version" : "3.15.1"
       }
     },
     {

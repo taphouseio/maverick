@@ -8,6 +8,7 @@ let package = Package(
     ],
     products: [
         .executable(name: "Maverick", targets: ["Maverick"]),
+        .library(name: "MaverickBroadcast", targets: ["MaverickBroadcast"]),
         .library(name: "MaverickContent", targets: ["MaverickContent"]),
         .library(name: "MaverickLib", targets: ["MaverickLib"]),
         .library(name: "MaverickModels", targets: ["MaverickModels"]),
@@ -22,6 +23,9 @@ let package = Package(
         .package(url: "https://github.com/jsorge/textbundleify.git", from: "0.1.0"),
         .package(url: "https://github.com/JohnSundell/ShellOut.git", from: "2.2.0"),
         .package(url: "https://github.com/edonv/JSONValue.git", from: "1.1.4"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
+        .package(url: "https://github.com/awslabs/aws-sdk-swift.git", exact: "1.7.67"),
+        .package(url: "https://github.com/smithy-lang/smithy-swift.git", exact: "0.246.0"),
     ],
     targets: [
         .target(
@@ -29,6 +33,16 @@ let package = Package(
             dependencies: [
                 "PathKit",
                 .product(name: "Vapor", package: "vapor"),
+            ]
+        ),
+        .target(
+            name: "MaverickBroadcast",
+            dependencies: [
+                "MaverickModels",
+                .product(name: "AWSS3", package: "aws-sdk-swift"),
+                .product(name: "Smithy", package: "smithy-swift"),
+                .product(name: "SmithyIdentity", package: "smithy-swift"),
+                .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),
         .target(
@@ -45,8 +59,10 @@ let package = Package(
             name: "Maverick",
             dependencies: [
                 "MaverickLib",
+                "MaverickBroadcast",
                 "Micropub",
                 "ShellOut",
+                .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Leaf", package: "leaf"),
                 .product(name: "TextBundleify", package: "textbundleify"),
                 .product(name: "Vapor", package: "vapor"),
@@ -82,6 +98,10 @@ let package = Package(
                 "PathKit",
                 .product(name: "TextBundleify", package: "textbundleify"),
             ]
+        ),
+        .testTarget(
+            name: "MaverickBroadcastTests",
+            dependencies: ["MaverickBroadcast", "MaverickModels"]
         ),
     ]
 )

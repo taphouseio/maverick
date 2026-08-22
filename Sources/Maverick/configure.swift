@@ -1,6 +1,7 @@
 import Leaf
 import LeafKit
 import Logging
+import MaverickBroadcast
 import MaverickLib
 import MaverickModels
 import Vapor
@@ -8,19 +9,26 @@ import NIOCore
 
 /// Called before your application initializes.
 public func configure(_ app: Application) async throws {
-    // Register routes to the router
-    try registerRoutes(app)
-
     // Configure the rest of your application here
     app.leaf.configuration = MaverickLeafProvider.config
     app.views.use(.leaf)
 
     let siteConfig = try SiteConfigController.fetchSite()
+    if let broadcasting = siteConfig.broadcasting {
+        let runtime = await BroadcastRuntime.make(configuration: broadcasting)
+        app.broadcastRuntime = runtime
+        if let error = runtime.startupError {
+            app.logger.error("Post broadcaster is unavailable: \(error)")
+        }
+    }
     if siteConfig.disablePageCaching {
         app.leaf.cache.isEnabled = false
     } else {
         app.leaf.cache.isEnabled = true
     }
+
+    // Register admin routes only after the optional broadcaster runtime exists.
+    try registerRoutes(app)
 
     let files: FileMiddleware
     let workingDir = FileManager.default.currentDirectoryPath
@@ -73,6 +81,7 @@ final class MaintenanceLifecycle: LifecycleHandler {
         ) { _ in
             app.threadPool.runIfActive(eventLoop: loop) {
                 var encounteredError = false
+                var broadcastPosts = [MaverickBroadcast.PostPayload]()
 
                 do {
                     try FeedOutput.makeAllTheFeeds()
@@ -98,8 +107,23 @@ final class MaintenanceLifecycle: LifecycleHandler {
                     MaverickLogger.shared?.error("Something went wrong linking images to posts: \(error)")
                 }
 
+                if let runtime = app.broadcastRuntime {
+                    do {
+                        broadcastPosts = try runtime.currentPosts()
+                    } catch {
+                        encounteredError = true
+                        MaverickLogger.shared?.error("Unable to prepare posts for broadcasting: \(error)")
+                    }
+                }
+
                 if encounteredError {
                     throw MaintenanceError.stepFailed
+                }
+                return broadcastPosts
+            }.flatMap { posts in
+                loop.makeFutureWithTask {
+                    guard let coordinator = app.broadcastRuntime?.coordinator else { return }
+                    await coordinator.observe(posts)
                 }
             }.map {
                 logger.debug("Maintenance cycle completed")

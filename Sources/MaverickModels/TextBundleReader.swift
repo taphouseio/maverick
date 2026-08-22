@@ -23,9 +23,11 @@ public struct TextBundleReader {
         let bundleData: Data = try infoPath.read()
 
         let frontMatter: FrontMatter
+        var broadcastMetadata: BroadcastMetadata?
         let content: String
         if let bundleInfo = BundleInfo(json: bundleData), let bundledFrontMatter = bundleInfo.frontMatter {
             frontMatter = bundledFrontMatter
+            broadcastMetadata = bundleInfo.broadcastMetadata
             content = markdown
         } else if let legacy = try Self.legacyFrontMatter(in: markdown) {
             frontMatter = legacy.frontMatter
@@ -34,7 +36,7 @@ public struct TextBundleReader {
             throw FileReaderError.unreadableFile(bundlePath)
         }
 
-        let post = BasePost(frontMatter: frontMatter, content: content)
+        let post = BasePost(frontMatter: frontMatter, content: content, broadcastMetadata: broadcastMetadata)
         return post
     }
 

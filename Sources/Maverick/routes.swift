@@ -14,5 +14,5 @@ func registerRoutes(_ app: Application) throws {
     try app.register(collection: PostListRouteCollection(config: config))
     try app.register(collection: SinglePostRouteCollection(config: config))
     try app.register(collection: TagRouteCollection())
-    try app.register(collection: AdminRouteCollection())
+    try app.register(collection: AdminRouteCollection(runtime: app.broadcastRuntime))
 }

@@ -24,6 +24,8 @@ public struct SiteConfig: Codable, Sendable {
     public let feedSize: Int
     /// Upon adding a new post, ping these URLS so that the proper feeds are refreshed
     public var sitesToPing: [URL]?
+    /// Optional configuration for publishing new posts to external services.
+    public let broadcasting: BroadcastingConfig?
     /// The year to go in the footer.
     public let year: String = {
         let calendar = Calendar.current
@@ -43,6 +45,7 @@ public struct SiteConfig: Codable, Sendable {
         try container.encode(year, forKey: .year)
         try container.encode(feedSize, forKey: .feedSize)
         try container.encodeIfPresent(sitesToPing, forKey: .sitesToPing)
+        try container.encodeIfPresent(broadcasting, forKey: .broadcasting)
         try container.encode(disablePageCaching, forKey: .disablePageCaching)
     }
 
@@ -55,6 +58,7 @@ public struct SiteConfig: Codable, Sendable {
         self.batchSize = try container.decode(Int.self, forKey: .batchSize)
         self.feedSize = try container.decode(Int.self, forKey: .feedSize)
         self.sitesToPing = try container.decodeIfPresent([URL].self, forKey: .sitesToPing)
+        self.broadcasting = try container.decodeIfPresent(BroadcastingConfig.self, forKey: .broadcasting)
         self.disablePageCaching = (try? container.decode(Bool.self, forKey: .disablePageCaching)) ?? false
     }
     
@@ -67,6 +71,7 @@ public struct SiteConfig: Codable, Sendable {
         case year
         case feedSize
         case sitesToPing
+        case broadcasting
         case disablePageCaching
     }
 }
