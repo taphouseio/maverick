@@ -18,8 +18,16 @@ public struct ProviderRegistry: Sendable {
 
     public init(factories: [any ProviderFactory] = [
         BlueskyProviderFactory(), MastodonProviderFactory(), LinkedInProviderFactory(),
-    ]) {
-        self.factories = Dictionary(uniqueKeysWithValues: factories.map { ($0.providerType, $0) })
+    ]) throws {
+        var registered: [BroadcastingProviderType: any ProviderFactory] = [:]
+        for factory in factories {
+            guard registered.updateValue(factory, forKey: factory.providerType) == nil else {
+                throw ProviderFailure.configuration(
+                    "Duplicate provider factory: \(factory.providerType.rawValue)"
+                )
+            }
+        }
+        self.factories = registered
     }
 
     public func make(

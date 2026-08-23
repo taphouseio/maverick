@@ -20,12 +20,12 @@ public actor Coordinator {
         store: any StateStore,
         providers: [any Provider],
         renderer: TemplateRenderer = TemplateRenderer()
-    ) {
+    ) throws {
         self.configuration = configuration
         self.store = store
         self.renderer = renderer
-        self.providers = Dictionary(uniqueKeysWithValues: providers.map { ($0.id, $0) })
-        self.providerConfigurations = Dictionary(uniqueKeysWithValues: configuration.providers.map { ($0.id, $0) })
+        self.providers = try Self.indexProviders(providers)
+        self.providerConfigurations = try Self.indexProviderConfigurations(configuration.providers)
         self.health = .uninitialized
     }
 
@@ -69,10 +69,9 @@ public actor Coordinator {
     public func ledgerSnapshot() -> Ledger? { ledger }
 
     public func observe(_ posts: [PostPayload]) async {
-        latestPosts = Dictionary(uniqueKeysWithValues: posts.map { ($0.identifier, $0) })
-        guard ledger != nil, case .ready = health else { return }
-
         do {
+            latestPosts = try Self.indexPosts(posts)
+            guard ledger != nil, case .ready = health else { return }
             var changed = false
             let now = Date()
             for post in posts {
@@ -109,6 +108,7 @@ public actor Coordinator {
     }
 
     public func initialize(with posts: [PostPayload]) async throws {
+        let indexedPosts = try Self.indexPosts(posts)
         guard ledger == nil else { return }
         guard case .uninitialized = health else {
             throw R2StoreError.unavailable("Refusing to create a new ledger while authoritative R2 state is unavailable")
@@ -123,7 +123,7 @@ public actor Coordinator {
             initialized.posts[post.identifier] = PostState(post: post, firstSeenAt: now, deliveries: deliveries)
         }
         ledger = initialized
-        latestPosts = Dictionary(uniqueKeysWithValues: posts.map { ($0.identifier, $0) })
+        latestPosts = indexedPosts
         do {
             try await commit()
             health = .ready
@@ -398,5 +398,37 @@ public actor Coordinator {
     private static func idempotencyKey(postID: String, providerID: String, generation: UInt64) -> String {
         let data = Data("\(providerID):\(postID):\(generation)".utf8)
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private static func indexProviders(_ providers: [any Provider]) throws -> [String: any Provider] {
+        var indexed: [String: any Provider] = [:]
+        for provider in providers {
+            guard indexed.updateValue(provider, forKey: provider.id) == nil else {
+                throw ProviderFailure.configuration("Duplicate provider ID: \(provider.id)")
+            }
+        }
+        return indexed
+    }
+
+    private static func indexProviderConfigurations(
+        _ configurations: [BroadcastingProviderConfig]
+    ) throws -> [String: BroadcastingProviderConfig] {
+        var indexed: [String: BroadcastingProviderConfig] = [:]
+        for configuration in configurations {
+            guard indexed.updateValue(configuration, forKey: configuration.id) == nil else {
+                throw ProviderFailure.configuration("Duplicate provider ID: \(configuration.id)")
+            }
+        }
+        return indexed
+    }
+
+    private static func indexPosts(_ posts: [PostPayload]) throws -> [String: PostPayload] {
+        var indexed: [String: PostPayload] = [:]
+        for post in posts {
+            guard indexed.updateValue(post, forKey: post.identifier) == nil else {
+                throw ProviderFailure.validation("Duplicate canonical post URL: \(post.identifier)")
+            }
+        }
+        return indexed
     }
 }

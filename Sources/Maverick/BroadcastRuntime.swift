@@ -38,7 +38,7 @@ final class BroadcastRuntime: Sendable {
                     "Unsupported state store: \(configuration.state.type)"
                 )
             }
-            let registry = ProviderRegistry()
+            let registry = try ProviderRegistry()
             let providers: [any Provider] = configuration.providers.filter(\.enabled).map { provider in
                 do {
                     return try registry.make(configuration: provider, secrets: secrets)
@@ -52,7 +52,7 @@ final class BroadcastRuntime: Sendable {
                     return UnavailableProvider(id: provider.id, characterLimit: limit, reason: error.localizedDescription)
                 }
             }
-            let coordinator = Coordinator(configuration: configuration, store: store, providers: providers)
+            let coordinator = try Coordinator(configuration: configuration, store: store, providers: providers)
             await coordinator.start()
             return BroadcastRuntime(
                 configuration: configuration,

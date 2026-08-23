@@ -8,7 +8,7 @@ final class CoordinatorTests: XCTestCase {
         let store = MemoryStore()
         let recorder = ProviderRecorder()
         let provider = TestProvider(id: "test", recorder: recorder)
-        let coordinator = Coordinator(configuration: config(enabled: true), store: store, providers: [provider])
+        let coordinator = try Coordinator(configuration: config(enabled: true), store: store, providers: [provider])
         await coordinator.start()
 
         let existing = post(url: "https://example.com/existing", date: Date(timeIntervalSince1970: 100))
@@ -32,7 +32,7 @@ final class CoordinatorTests: XCTestCase {
     func testMicropostsAreSkipped() async throws {
         let store = MemoryStore()
         let recorder = ProviderRecorder()
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: true),
             store: store,
             providers: [TestProvider(id: "test", recorder: recorder)]
@@ -60,7 +60,7 @@ final class CoordinatorTests: XCTestCase {
 
     func testPublicationBoundaryIsInclusive() async throws {
         let recorder = ProviderRecorder()
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: true),
             store: MemoryStore(),
             providers: [TestProvider(id: "test", recorder: recorder)]
@@ -79,7 +79,7 @@ final class CoordinatorTests: XCTestCase {
 
     func testDisabledAutomaticPublishingStillAllowsDeliberateBackfill() async throws {
         let recorder = ProviderRecorder()
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: false),
             store: MemoryStore(),
             providers: [TestProvider(id: "test", recorder: recorder)]
@@ -106,7 +106,7 @@ final class CoordinatorTests: XCTestCase {
         let postState = PostState(post: source, firstSeenAt: Date(timeIntervalSince1970: 400), deliveries: ["test": delivery])
         let ledger = Ledger(revision: 4, initializedAt: Date(), posts: [source.identifier: postState])
         let store = MemoryStore(initial: ledger)
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: true),
             store: store,
             providers: [TestProvider(id: "test", recorder: ProviderRecorder())]
@@ -122,7 +122,7 @@ final class CoordinatorTests: XCTestCase {
     func testExplicitRetryOnlyResendsFailedProvider() async throws {
         let store = MemoryStore()
         let recorder = ProviderRecorder(outcomes: [.transient, .success])
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: true),
             store: store,
             providers: [TestProvider(id: "test", recorder: recorder)]
@@ -147,7 +147,7 @@ final class CoordinatorTests: XCTestCase {
 
     func testDeliberateRebroadcastAdvancesDeliveryGeneration() async throws {
         let recorder = ProviderRecorder(outcomes: [.success, .success])
-        let coordinator = Coordinator(
+        let coordinator = try Coordinator(
             configuration: config(enabled: true),
             store: MemoryStore(),
             providers: [TestProvider(id: "test", recorder: recorder)]
@@ -165,6 +165,46 @@ final class CoordinatorTests: XCTestCase {
         XCTAssertEqual(snapshot?.posts[source.identifier]?.deliveries["test"]?.generation, 1)
         XCTAssertEqual(idempotencyKeys.count, 2)
         XCTAssertEqual(Set(idempotencyKeys).count, 2)
+    }
+
+    func testDuplicateProviderIDsAreRejected() throws {
+        let providerConfig = BroadcastingProviderConfig(
+            id: "duplicate", type: .mastodon, postTemplate: "{{url}}"
+        )
+        let configuration = BroadcastingConfig(
+            enabled: false,
+            autoPublishAfter: .distantFuture,
+            state: .init(
+                r2: .init(
+                    bucket: "test", keyPrefix: "test", accountIDSecret: "a",
+                    accessKeyIDSecret: "b", secretAccessKeySecret: "c"
+                ),
+                encryptionKeySecret: "d"
+            ),
+            admin: .init(usernameSecret: "u", passwordSecret: "p"),
+            providers: [providerConfig, providerConfig]
+        )
+
+        XCTAssertThrowsError(
+            try Coordinator(configuration: configuration, store: MemoryStore(), providers: [])
+        )
+    }
+
+    func testDuplicateCanonicalPostURLsAreRejected() async throws {
+        let coordinator = try Coordinator(
+            configuration: config(enabled: false),
+            store: MemoryStore(),
+            providers: [TestProvider(id: "test", recorder: ProviderRecorder())]
+        )
+        await coordinator.start()
+        let source = post(url: "https://example.com/duplicate", date: Date())
+
+        do {
+            try await coordinator.initialize(with: [source, source])
+            XCTFail("Expected duplicate canonical URLs to be rejected")
+        } catch let failure as ProviderFailure {
+            XCTAssertEqual(failure.localizedDescription, "Duplicate canonical post URL: \(source.identifier)")
+        }
     }
 
     private func config(enabled: Bool) -> BroadcastingConfig {
