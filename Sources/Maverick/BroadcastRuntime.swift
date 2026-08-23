@@ -22,10 +22,22 @@ final class BroadcastRuntime: Sendable {
         self.secrets = secrets
     }
 
-    static func make(configuration: BroadcastingConfig) async -> BroadcastRuntime {
+    static func make(configuration: BroadcastingConfig, allowsLocalState: Bool) async -> BroadcastRuntime {
         let secrets = FileSecretResolver()
         do {
-            let store = try R2StateStore(configuration: configuration.state, secrets: secrets)
+            let store: any StateStore
+            switch configuration.state.type {
+            case "r2":
+                store = try R2StateStore(configuration: configuration.state, secrets: secrets)
+            case "local" where allowsLocalState:
+                store = try FileStateStore(configuration: configuration.state, secrets: secrets)
+            case "local":
+                throw R2StoreError.unsupportedConfiguration("Local broadcast state is disabled in production")
+            default:
+                throw R2StoreError.unsupportedConfiguration(
+                    "Unsupported state store: \(configuration.state.type)"
+                )
+            }
             let registry = ProviderRegistry()
             let providers: [any Provider] = configuration.providers.filter(\.enabled).map { provider in
                 do {

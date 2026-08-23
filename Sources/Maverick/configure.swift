@@ -15,7 +15,10 @@ public func configure(_ app: Application) async throws {
 
     let siteConfig = try SiteConfigController.fetchSite()
     if let broadcasting = siteConfig.broadcasting {
-        let runtime = await BroadcastRuntime.make(configuration: broadcasting)
+        let runtime = await BroadcastRuntime.make(
+            configuration: broadcasting,
+            allowsLocalState: app.environment != .production
+        )
         app.broadcastRuntime = runtime
         if let error = runtime.startupError {
             app.logger.error("Post broadcaster is unavailable: \(error)")

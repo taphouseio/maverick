@@ -54,49 +54,58 @@ public struct BroadcastingConfig: Codable, Sendable {
 
 public struct BroadcastingStateConfig: Codable, Sendable {
     public let type: String
-    public let bucket: String
-    public let keyPrefix: String
-    public let accountIDSecret: String
-    public let accessKeyIDSecret: String
-    public let secretAccessKeySecret: String
+    public let r2: R2StateConfig?
     public let encryptionKeySecret: String
     public let localCachePath: String?
+    public let path: String?
 
     public init(
         type: String = "r2",
-        bucket: String,
-        keyPrefix: String,
-        accountIDSecret: String,
-        accessKeyIDSecret: String,
-        secretAccessKeySecret: String,
+        r2: R2StateConfig? = nil,
         encryptionKeySecret: String,
-        localCachePath: String? = nil
+        localCachePath: String? = nil,
+        path: String? = nil
     ) {
         self.type = type
-        self.bucket = bucket
-        self.keyPrefix = keyPrefix
-        self.accountIDSecret = accountIDSecret
-        self.accessKeyIDSecret = accessKeyIDSecret
-        self.secretAccessKeySecret = secretAccessKeySecret
+        self.r2 = r2
         self.encryptionKeySecret = encryptionKeySecret
         self.localCachePath = localCachePath
+        self.path = path
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, bucket, keyPrefix, accountIDSecret, accessKeyIDSecret
-        case secretAccessKeySecret, encryptionKeySecret, localCachePath
+        case type, r2, encryptionKeySecret, localCachePath, path
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         type = try container.decodeIfPresent(String.self, forKey: .type) ?? "r2"
-        bucket = try container.decode(String.self, forKey: .bucket)
-        keyPrefix = try container.decode(String.self, forKey: .keyPrefix)
-        accountIDSecret = try container.decode(String.self, forKey: .accountIDSecret)
-        accessKeyIDSecret = try container.decode(String.self, forKey: .accessKeyIDSecret)
-        secretAccessKeySecret = try container.decode(String.self, forKey: .secretAccessKeySecret)
+        r2 = try container.decodeIfPresent(R2StateConfig.self, forKey: .r2)
         encryptionKeySecret = try container.decode(String.self, forKey: .encryptionKeySecret)
         localCachePath = try container.decodeIfPresent(String.self, forKey: .localCachePath)
+        path = try container.decodeIfPresent(String.self, forKey: .path)
+    }
+}
+
+public struct R2StateConfig: Codable, Sendable {
+    public let bucket: String
+    public let keyPrefix: String
+    public let accountIDSecret: String
+    public let accessKeyIDSecret: String
+    public let secretAccessKeySecret: String
+
+    public init(
+        bucket: String,
+        keyPrefix: String,
+        accountIDSecret: String,
+        accessKeyIDSecret: String,
+        secretAccessKeySecret: String
+    ) {
+        self.bucket = bucket
+        self.keyPrefix = keyPrefix
+        self.accountIDSecret = accountIDSecret
+        self.accessKeyIDSecret = accessKeyIDSecret
+        self.secretAccessKeySecret = secretAccessKeySecret
     }
 }
 

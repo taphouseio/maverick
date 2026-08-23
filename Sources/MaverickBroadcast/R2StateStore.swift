@@ -24,6 +24,7 @@ public actor R2StateStore: StateStore {
     }
 
     private let configuration: BroadcastingStateConfig
+    private let keyPrefix: String
     private let client: R2Client
     private let cipher: SnapshotCipher
     private let cacheURL: URL
@@ -34,17 +35,21 @@ public actor R2StateStore: StateStore {
         guard configuration.type == "r2" else {
             throw R2StoreError.unsupportedConfiguration("Unsupported state store: \(configuration.type)")
         }
-        let accountID = try secrets.resolve(configuration.accountIDSecret)
-        let accessKeyID = try secrets.resolve(configuration.accessKeyIDSecret)
-        let secretAccessKey = try secrets.resolve(configuration.secretAccessKeySecret)
+        guard let r2 = configuration.r2 else {
+            throw R2StoreError.unsupportedConfiguration("R2 state requires an r2 configuration block")
+        }
+        let accountID = try secrets.resolve(r2.accountIDSecret)
+        let accessKeyID = try secrets.resolve(r2.accessKeyIDSecret)
+        let secretAccessKey = try secrets.resolve(r2.secretAccessKeySecret)
         let encryptionSecret = try secrets.resolve(configuration.encryptionKeySecret)
 
         self.configuration = configuration
+        self.keyPrefix = r2.keyPrefix
         self.client = try R2Client(
             accountID: accountID,
             accessKeyID: accessKeyID,
             secretAccessKey: secretAccessKey,
-            bucket: configuration.bucket
+            bucket: r2.bucket
         )
         self.cipher = SnapshotCipher(secret: encryptionSecret)
         self.cacheURL = URL(
@@ -130,7 +135,7 @@ public actor R2StateStore: StateStore {
     }
 
     private var normalizedPrefix: String {
-        configuration.keyPrefix.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        keyPrefix.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
     }
 
     private var latestKey: String { normalizedPrefix + "/latest.json" }

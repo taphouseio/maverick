@@ -1,0 +1,52 @@
+title: Maverick Broadcast Development
+description: Local development site for Maverick's post broadcaster
+url: http://127.0.0.1:__MAVERICK_DEV_PORT__
+metaDescription: Local Maverick broadcaster development.
+batchSize: 5
+feedSize: 20
+disablePageCaching: true
+broadcasting:
+  enabled: false
+  autoPublishAfter: 2100-01-01T00:00:00Z
+  admin:
+    usernameSecret: maverick-admin-username
+    passwordSecret: maverick-admin-password
+  state:
+    type: local
+    path: _dev/.maverick-data/broadcast-state
+    encryptionKeySecret: maverick-state-encryption-key
+  providers:
+    - id: bluesky
+      type: bluesky
+      account: example.bsky.social
+      credentialSecret: bluesky-app-password
+      linkPreview: true
+      postTemplate: |-
+        New blog post: {{title}}
+
+        {{description}}
+
+        {{url}}
+    - id: mastodon
+      type: mastodon
+      instanceURL: https://mastodon.social
+      accessTokenSecret: mastodon-access-token
+      visibility: public
+      postTemplate: |-
+        New blog post: {{title}}
+
+        {{excerpt}}
+
+        {{url}}
+    - id: linkedin
+      type: linkedin
+      clientIDSecret: linkedin-client-id
+      clientSecretSecret: linkedin-client-secret
+      linkedinVersion: "202604"
+      visibility: public
+      postTemplate: |-
+        New blog post: {{title}}
+
+        {{description}}
+
+        Read more: {{url}}

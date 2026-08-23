@@ -99,7 +99,7 @@ private func broadcastPage(req: Request, runtime: BroadcastRuntime) async throws
     var response: Response
     guard let coordinator = runtime.coordinator else {
         response = htmlResponse("<h1>Post Broadcaster</h1><p class=\"error\">\(escape(runtime.startupError ?? "Unavailable"))</p>")
-        setCSRFCookie(csrf, on: &response)
+        setCSRFCookie(csrf, on: &response, secure: req.application.environment == .production)
         return response
     }
 
@@ -112,7 +112,8 @@ private func broadcastPage(req: Request, runtime: BroadcastRuntime) async throws
 
     var body = "<h1>Post Broadcaster</h1>"
     if let queryMessage { body += "<p class=\"notice\">\(escape(queryMessage))</p>" }
-    body += "<p>\(escape(statusText(status)))</p>"
+    let stateLabel = runtime.configuration.state.type == "r2" ? "R2" : "Local"
+    body += "<p>\(escape(statusText(status, stateLabel: stateLabel)))</p>"
     body += "<p>Automatic delivery: <strong>\(runtime.configuration.enabled ? "enabled" : "disabled")</strong></p>"
 
     if ledger == nil, case .uninitialized = status.health {
@@ -177,7 +178,7 @@ private func broadcastPage(req: Request, runtime: BroadcastRuntime) async throws
         }
     }
 
-    body += "<h2>R2 snapshots</h2><p>Revision \(status.revision.map(String.init) ?? "none")</p><ul>"
+    body += "<h2>\(stateLabel) snapshots</h2><p>Revision \(status.revision.map(String.init) ?? "none")</p><ul>"
     for snapshot in snapshots.prefix(20) {
         body += "<li>Revision \(snapshot.revision)"
         if snapshot.revision != status.revision { body += restoreForm(snapshot: snapshot, csrf: csrf) }
@@ -186,7 +187,7 @@ private func broadcastPage(req: Request, runtime: BroadcastRuntime) async throws
     body += "</ul>"
 
     response = htmlResponse(body)
-    setCSRFCookie(csrf, on: &response)
+    setCSRFCookie(csrf, on: &response, secure: req.application.environment == .production)
     return response
 }
 
@@ -282,11 +283,11 @@ private func linkedinCallbackURL() throws -> URL {
         .appendingPathComponent("callback")
 }
 
-private func statusText(_ status: CoordinatorStatus) -> String {
+private func statusText(_ status: CoordinatorStatus, stateLabel: String) -> String {
     switch status.health {
     case .disabled: return "Disabled"
-    case .uninitialized: return "R2 state is uninitialized"
-    case .ready: return "R2 state is healthy at revision \(status.revision.map(String.init) ?? "0")"
+    case .uninitialized: return "\(stateLabel) state is uninitialized"
+    case .ready: return "\(stateLabel) state is healthy at revision \(status.revision.map(String.init) ?? "0")"
     case .unavailable(let message): return "Broadcasting unavailable: \(message)"
     }
 }
@@ -309,9 +310,9 @@ private func htmlResponse(_ body: String) -> Response {
     return Response(status: .ok, headers: headers, body: .init(string: page))
 }
 
-private func setCSRFCookie(_ value: String, on response: inout Response) {
+private func setCSRFCookie(_ value: String, on response: inout Response, secure: Bool) {
     response.cookies[AdminCSRFMiddleware.cookieName] = .init(
-        string: value, maxAge: 3_600, path: "/_admin", isSecure: true, isHTTPOnly: true, sameSite: .strict
+        string: value, maxAge: 3_600, path: "/_admin", isSecure: secure, isHTTPOnly: true, sameSite: .strict
     )
 }
 

@@ -69,6 +69,8 @@ Feeds will be generated with full text and truncated variants, in both [RSS](htt
 
 Maverick can also publish long-form posts directly to Bluesky, Mastodon, and LinkedIn with per-provider templates and an encrypted Cloudflare R2 delivery ledger. See [Post broadcasting](Docs/Broadcasting.md) for configuration, authorization, safety, and migration details.
 
+To exercise the broadcaster admin locally with encrypted file state and no Cloudflare account, populate `_dev` with `mise run dev` once and run `mise run broadcast-dev`.
+
 ## Should I Use It?
 
 Probably not yet. It's at a very early stage of development, and built to scratch my own itch and migrate from my current Ghost blog. But if it's up your alley feel free to check it out.

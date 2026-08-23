@@ -216,8 +216,14 @@ public protocol SecretResolver: Sendable {
 public struct FileSecretResolver: SecretResolver {
     public let directory: URL
 
-    public init(directory: URL = URL(fileURLWithPath: "/run/secrets", isDirectory: true)) {
-        self.directory = directory
+    public init(directory: URL? = nil) {
+        if let directory {
+            self.directory = directory
+        } else if let path = ProcessInfo.processInfo.environment["MAVERICK_SECRETS_DIRECTORY"], !path.isEmpty {
+            self.directory = URL(fileURLWithPath: path, isDirectory: true)
+        } else {
+            self.directory = URL(fileURLWithPath: "/run/secrets", isDirectory: true)
+        }
     }
 
     public func resolve(_ reference: String) throws -> String {

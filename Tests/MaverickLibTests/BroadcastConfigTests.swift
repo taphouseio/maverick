@@ -19,12 +19,13 @@ final class BroadcastConfigTests: XCTestCase {
             passwordSecret: admin-password
           state:
             type: r2
-            bucket: state
-            keyPrefix: example.com
-            accountIDSecret: account
-            accessKeyIDSecret: access
-            secretAccessKeySecret: secret
             encryptionKeySecret: encryption
+            r2:
+              bucket: state
+              keyPrefix: example.com
+              accountIDSecret: account
+              accessKeyIDSecret: access
+              secretAccessKeySecret: secret
           providers:
             - id: bluesky
               type: bluesky
@@ -43,5 +44,6 @@ final class BroadcastConfigTests: XCTestCase {
         XCTAssertEqual(site.broadcasting?.providers.first?.postTemplate,
                        "{{title}}\n\n{{description}}\n\n{{url}}")
         XCTAssertEqual(site.broadcasting?.autoPublishAfter, ISO8601DateFormatter().date(from: "2026-09-01T00:00:00Z"))
+        XCTAssertEqual(site.broadcasting?.state.r2?.bucket, "state")
     }
 }

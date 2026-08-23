@@ -146,8 +146,11 @@ final class CoordinatorTests: XCTestCase {
             enabled: enabled,
             autoPublishAfter: Date(timeIntervalSince1970: 200),
             state: .init(
-                bucket: "test", keyPrefix: "test", accountIDSecret: "a",
-                accessKeyIDSecret: "b", secretAccessKeySecret: "c", encryptionKeySecret: "d"
+                r2: .init(
+                    bucket: "test", keyPrefix: "test", accountIDSecret: "a",
+                    accessKeyIDSecret: "b", secretAccessKeySecret: "c"
+                ),
+                encryptionKeySecret: "d"
             ),
             admin: .init(usernameSecret: "u", passwordSecret: "p"),
             providers: [.init(id: "test", type: .mastodon, postTemplate: "{{title}} {{url}}")]
