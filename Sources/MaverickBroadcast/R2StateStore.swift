@@ -104,7 +104,7 @@ public actor R2StateStore: StateStore {
         try await client.putObject(key: snapshot.key, data: encrypted, contentType: "application/octet-stream")
         let pointer = try encoder.encode(LatestPointer(snapshot: snapshot))
         try await client.putObject(key: latestKey, data: pointer, contentType: "application/json")
-        try updateLocalCache(encrypted)
+        updateLocalCacheBestEffort(encrypted)
         return snapshot
     }
 
@@ -121,7 +121,7 @@ public actor R2StateStore: StateStore {
             throw R2StoreError.invalidSnapshot("Checksum mismatch for R2 snapshot revision \(snapshot.revision)")
         }
         let ledger = try decode(data, expecting: snapshot)
-        try updateLocalCache(data)
+        updateLocalCacheBestEffort(data)
         return ledger
     }
 
@@ -164,6 +164,12 @@ public actor R2StateStore: StateStore {
         } else {
             try FileManager.default.moveItem(at: temporary, to: cacheURL)
         }
+    }
+
+    private func updateLocalCacheBestEffort(_ data: Data) {
+        // R2 is authoritative. A cache refresh must never turn an already-successful
+        // R2 commit or restore into a reported failure.
+        try? updateLocalCache(data)
     }
 }
 
