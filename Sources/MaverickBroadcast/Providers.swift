@@ -107,7 +107,7 @@ public struct BlueskyProvider: Provider {
     public func send(_ post: PreparedPost, connection: ProviderConnection?) async throws -> DeliveryResult {
         let session = try await session()
         let pds = session.pdsURL ?? serviceURL
-        let rkey = String(Self.sha256(post.source.identifier).prefix(24))
+        let rkey = String(post.idempotencyKey.prefix(24))
         let record = Record(
             type: "app.bsky.feed.post",
             text: post.text,

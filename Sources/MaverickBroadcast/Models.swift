@@ -123,6 +123,7 @@ public enum DeliveryStatus: String, Codable, CaseIterable, Sendable {
 public struct DeliveryState: Codable, Equatable, Sendable {
     public var status: DeliveryStatus
     public var attemptCount: Int
+    public var generation: UInt64
     public var renderedTextHash: String?
     public var externalID: String?
     public var externalURL: URL?
@@ -134,8 +135,28 @@ public struct DeliveryState: Codable, Equatable, Sendable {
     public init(status: DeliveryStatus, now: Date = Date()) {
         self.status = status
         self.attemptCount = 0
+        self.generation = 0
         self.createdAt = now
         self.updatedAt = now
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case status, attemptCount, generation, renderedTextHash, externalID, externalURL
+        case lastError, retryAt, createdAt, updatedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        status = try container.decode(DeliveryStatus.self, forKey: .status)
+        attemptCount = try container.decode(Int.self, forKey: .attemptCount)
+        generation = try container.decodeIfPresent(UInt64.self, forKey: .generation) ?? 0
+        renderedTextHash = try container.decodeIfPresent(String.self, forKey: .renderedTextHash)
+        externalID = try container.decodeIfPresent(String.self, forKey: .externalID)
+        externalURL = try container.decodeIfPresent(URL.self, forKey: .externalURL)
+        lastError = try container.decodeIfPresent(String.self, forKey: .lastError)
+        retryAt = try container.decodeIfPresent(Date.self, forKey: .retryAt)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
 }
 

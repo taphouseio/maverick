@@ -194,6 +194,9 @@ public actor Coordinator {
         guard delivery.status != .sending else {
             throw ProviderFailure.validation("A sending delivery cannot be queued again")
         }
+        if delivery.status == .delivered {
+            delivery.generation += 1
+        }
         delivery.status = .queued
         delivery.externalID = nil
         delivery.externalURL = nil
@@ -320,7 +323,11 @@ public actor Coordinator {
             ledger?.posts[post.identifier]?.deliveries[provider.id] = delivery
             try await commit()
 
-            let idempotencyKey = Self.idempotencyKey(postID: post.identifier, providerID: provider.id)
+            let idempotencyKey = Self.idempotencyKey(
+                postID: post.identifier,
+                providerID: provider.id,
+                generation: delivery.generation
+            )
             let prepared = PreparedPost(
                 source: post,
                 text: text,
@@ -388,8 +395,8 @@ public actor Coordinator {
         }
     }
 
-    private static func idempotencyKey(postID: String, providerID: String) -> String {
-        let data = Data("\(providerID):\(postID)".utf8)
+    private static func idempotencyKey(postID: String, providerID: String, generation: UInt64) -> String {
+        let data = Data("\(providerID):\(postID):\(generation)".utf8)
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 }

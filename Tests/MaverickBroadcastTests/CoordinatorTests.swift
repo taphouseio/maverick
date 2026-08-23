@@ -137,8 +137,34 @@ final class CoordinatorTests: XCTestCase {
         try await coordinator.retry(postID: source.identifier, providerID: "test")
         snapshot = await coordinator.ledgerSnapshot()
         let sendCount = await recorder.sendCount
+        let idempotencyKeys = await recorder.idempotencyKeys
         XCTAssertEqual(snapshot?.posts[source.identifier]?.deliveries["test"]?.status, .delivered)
+        XCTAssertEqual(snapshot?.posts[source.identifier]?.deliveries["test"]?.generation, 0)
         XCTAssertEqual(sendCount, 2)
+        XCTAssertEqual(idempotencyKeys.count, 2)
+        XCTAssertEqual(Set(idempotencyKeys).count, 1)
+    }
+
+    func testDeliberateRebroadcastAdvancesDeliveryGeneration() async throws {
+        let recorder = ProviderRecorder(outcomes: [.success, .success])
+        let coordinator = Coordinator(
+            configuration: config(enabled: true),
+            store: MemoryStore(),
+            providers: [TestProvider(id: "test", recorder: recorder)]
+        )
+        await coordinator.start()
+        try await coordinator.initialize(with: [])
+        let source = post(url: "https://example.com/rebroadcast", date: Date(timeIntervalSince1970: 300))
+
+        await coordinator.observe([source])
+        try await coordinator.explicitlyQueue(postID: source.identifier, providerID: "test")
+
+        let snapshot = await coordinator.ledgerSnapshot()
+        let idempotencyKeys = await recorder.idempotencyKeys
+        XCTAssertEqual(snapshot?.posts[source.identifier]?.deliveries["test"]?.status, .delivered)
+        XCTAssertEqual(snapshot?.posts[source.identifier]?.deliveries["test"]?.generation, 1)
+        XCTAssertEqual(idempotencyKeys.count, 2)
+        XCTAssertEqual(Set(idempotencyKeys).count, 2)
     }
 
     private func config(enabled: Bool) -> BroadcastingConfig {
@@ -201,12 +227,14 @@ private actor MemoryStore: StateStore {
 private actor ProviderRecorder {
     enum Outcome: Sendable { case success; case transient }
     private(set) var sendCount = 0
+    private(set) var idempotencyKeys: [String] = []
     private var outcomes: [Outcome]
 
     init(outcomes: [Outcome] = [.success]) { self.outcomes = outcomes }
 
-    func send() throws -> DeliveryResult {
+    func send(_ post: PreparedPost) throws -> DeliveryResult {
         sendCount += 1
+        idempotencyKeys.append(post.idempotencyKey)
         let outcome = outcomes.isEmpty ? .success : outcomes.removeFirst()
         switch outcome {
         case .success: return DeliveryResult(externalID: "external-\(sendCount)")
@@ -221,7 +249,7 @@ private struct TestProvider: Provider {
     let characterLimit = 300
 
     func send(_ post: PreparedPost, connection: ProviderConnection?) async throws -> DeliveryResult {
-        try await recorder.send()
+        try await recorder.send(post)
     }
 
     func checkConnection(_ connection: ProviderConnection?) async throws {}
