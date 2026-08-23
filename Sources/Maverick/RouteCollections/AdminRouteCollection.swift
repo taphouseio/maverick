@@ -210,7 +210,11 @@ private struct AdminBasicAuthMiddleware: AsyncMiddleware {
     let limiter = AdminLoginLimiter()
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
-        let client = request.remoteAddress?.description ?? "unknown"
+        let address = runtime.configuration.admin.trustForwardedClientIP
+            ? request.peerAddress
+            : request.remoteAddress
+        // Never include the ephemeral source port in the limiter identity.
+        let client = address?.ipAddress ?? "unknown"
         guard await limiter.canAttempt(client: client) else {
             throw Abort(.tooManyRequests, reason: "Too many admin authentication failures")
         }

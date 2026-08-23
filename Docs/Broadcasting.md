@@ -50,6 +50,7 @@ broadcasting:
   admin:
     usernameSecret: maverick-admin-username
     passwordSecret: maverick-admin-password
+    trustForwardedClientIP: false
   state:
     type: r2
     encryptionKeySecret: maverick-state-encryption-key
@@ -103,6 +104,8 @@ Secret names resolve to files under `/run/secrets`. Keep that directory out of G
 - LinkedIn uses authorization-code OAuth with `openid profile w_member_social`. Configure its redirect URI as `https://SITE/_admin/broadcast/linkedin/callback`. The access token and member URN are stored only inside the encrypted R2 ledger. The admin page reports expiration and offers reconnect.
 
 The broadcaster admin is at `/_admin/broadcast`. In production all `/_admin` routes require HTTPS, Basic authentication, rate limiting, and CSRF validation. The LinkedIn callback omits Basic authentication but requires a persisted, ten-minute, single-use OAuth state.
+
+The login limiter uses the direct peer IP by default and never includes its ephemeral port. Set `trustForwardedClientIP: true` only when Maverick is reachable exclusively through a trusted reverse proxy that replaces, rather than appends to, client-supplied forwarding headers.
 
 ## Cloudflare R2 setup
 

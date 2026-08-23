@@ -112,10 +112,23 @@ public struct R2StateConfig: Codable, Sendable {
 public struct BroadcastingAdminConfig: Codable, Sendable {
     public let usernameSecret: String
     public let passwordSecret: String
+    public let trustForwardedClientIP: Bool
 
-    public init(usernameSecret: String, passwordSecret: String) {
+    public init(usernameSecret: String, passwordSecret: String, trustForwardedClientIP: Bool = false) {
         self.usernameSecret = usernameSecret
         self.passwordSecret = passwordSecret
+        self.trustForwardedClientIP = trustForwardedClientIP
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case usernameSecret, passwordSecret, trustForwardedClientIP
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        usernameSecret = try container.decode(String.self, forKey: .usernameSecret)
+        passwordSecret = try container.decode(String.self, forKey: .passwordSecret)
+        trustForwardedClientIP = try container.decodeIfPresent(Bool.self, forKey: .trustForwardedClientIP) ?? false
     }
 }
 

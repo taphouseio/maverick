@@ -17,6 +17,7 @@ final class BroadcastConfigTests: XCTestCase {
           admin:
             usernameSecret: admin-user
             passwordSecret: admin-password
+            trustForwardedClientIP: true
           state:
             type: r2
             encryptionKeySecret: encryption
@@ -45,5 +46,6 @@ final class BroadcastConfigTests: XCTestCase {
                        "{{title}}\n\n{{description}}\n\n{{url}}")
         XCTAssertEqual(site.broadcasting?.autoPublishAfter, ISO8601DateFormatter().date(from: "2026-09-01T00:00:00Z"))
         XCTAssertEqual(site.broadcasting?.state.r2?.bucket, "state")
+        XCTAssertEqual(site.broadcasting?.admin.trustForwardedClientIP, true)
     }
 }
