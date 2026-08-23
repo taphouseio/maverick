@@ -155,7 +155,11 @@ private func broadcastPage(req: Request, runtime: BroadcastRuntime) async throws
                     }
                     if let error = delivery?.lastError { body += " — \(escape(error))" }
                     if post.isSupported {
-                        body += " <a href=\"/_admin/broadcast/preview?postID=\(urlEncode(post.identifier))&providerID=\(urlEncode(provider.id))\">Preview</a>"
+                        let previewURL = adminURL(
+                            path: "/_admin/broadcast/preview",
+                            queryItems: ["postID": post.identifier, "providerID": provider.id]
+                        )
+                        body += " <a href=\"\(escape(previewURL))\">Preview</a>"
                         switch delivery?.status {
                         case .observed, .skipped:
                             body += deliveryForm(action: "/_admin/broadcast/backfill", csrf: csrf, postID: post.identifier,
@@ -297,8 +301,11 @@ private func statusText(_ status: CoordinatorStatus, stateLabel: String) -> Stri
 }
 
 private func redirectToAdmin(_ req: Request, message: String? = nil) -> Response {
-    let suffix = message.map { "?message=\(urlEncode($0))" } ?? ""
-    return req.redirect(to: "/_admin/broadcast\(suffix)")
+    let url = adminURL(
+        path: "/_admin/broadcast",
+        queryItems: message.map { ["message": $0] } ?? [:]
+    )
+    return req.redirect(to: url)
 }
 
 private func htmlResponse(_ body: String) -> Response {
@@ -357,8 +364,16 @@ private func escape(_ value: String) -> String {
         .replacingOccurrences(of: "\"", with: "&quot;")
         .replacingOccurrences(of: "'", with: "&#39;")
 }
-private func urlEncode(_ value: String) -> String {
-    value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+private func adminURL(path: String, queryItems: [String: String]) -> String {
+    guard !queryItems.isEmpty else { return path }
+    let query = queryItems.sorted(by: { $0.key < $1.key }).map { key, value in
+        "\(strictQueryEncode(key))=\(strictQueryEncode(value))"
+    }.joined(separator: "&")
+    return "\(path)?\(query)"
+}
+private func strictQueryEncode(_ value: String) -> String {
+    let unreserved = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
+    return value.addingPercentEncoding(withAllowedCharacters: unreserved) ?? value
 }
 private func format(_ date: Date?) -> String {
     date.map { ISO8601DateFormatter().string(from: $0) } ?? "unknown"
