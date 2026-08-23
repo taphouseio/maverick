@@ -56,7 +56,17 @@ public struct FeedOutput: Sendable {
 
     static func postsToGenerate(for outputType: TextOutputType) throws -> [Post] {
         let site = try SiteConfigController.fetchSite()
-        return Array(try allPosts(for: outputType).prefix(site.feedSize))
+        let paths = try PathHelper.pathsForAllPosts()
+        let controller = PostController(site: site)
+
+        var posts = [Post]()
+        for path in paths {
+            guard posts.count < site.feedSize else { break }
+            guard let postPath = PostPath(path: path) else { continue }
+            posts.append(try controller.fetchPost(withPath: postPath, outputtingFor: outputType))
+        }
+
+        return posts.sorted(by: { $0.date > $1.date })
     }
 
     public static func allPosts(for outputType: TextOutputType) throws -> [Post] {
@@ -71,7 +81,7 @@ public struct FeedOutput: Sendable {
             posts.append(post)
         }
 
-        return posts
+        return posts.sorted(by: { $0.date > $1.date })
     }
 
     static var allOutputsAndGenerators: [(generator: FeedGenerator.Type, output: TextOutputType)] {
