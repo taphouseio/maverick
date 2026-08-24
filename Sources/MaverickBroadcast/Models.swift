@@ -49,12 +49,20 @@ public struct PreparedPost: Sendable {
     public let text: String
     public let renderedTextHash: String
     public let idempotencyKey: String
+    public let generation: UInt64
 
-    public init(source: PostPayload, text: String, renderedTextHash: String, idempotencyKey: String) {
+    public init(
+        source: PostPayload,
+        text: String,
+        renderedTextHash: String,
+        idempotencyKey: String,
+        generation: UInt64 = 0
+    ) {
         self.source = source
         self.text = text
         self.renderedTextHash = renderedTextHash
         self.idempotencyKey = idempotencyKey
+        self.generation = generation
     }
 }
 
