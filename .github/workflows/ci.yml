@@ -26,12 +26,9 @@ jobs:
       - name: Run tests
         run: swift test --no-parallel
 
-      - name: Build release
-        run: swift build -c release
-
   linux:
     name: Swift package (Linux)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, X64]
 
     steps:
       - name: Checkout
