@@ -98,4 +98,46 @@ final class FileGeneratorTests : XCTestCase {
         let changed = try FeedOutput.makeAllTheFeeds()
         XCTAssertTrue(changed)
     }
+
+    func testFeedEntriesAreSortedByPublicationDateRatherThanFilename() throws {
+        let filenameNewer = "2099-01-01-actually-newer"
+        let filenameOlder = "2099-01-02-actually-older"
+        let markdownPaths = [filenameNewer, filenameOlder].map {
+            PathHelper.postFolderPath + Path("\($0).md")
+        }
+        let bundlePaths = [filenameNewer, filenameOlder].map {
+            PathHelper.postFolderPath + Path("\($0).textbundle")
+        }
+        defer {
+            for path in markdownPaths + bundlePaths where path.exists { try? path.delete() }
+        }
+
+        try markdownPaths[0].write(postText(
+            filename: filenameNewer,
+            title: "Actually newer",
+            date: "2100-01-01 00:00:00"
+        ))
+        try markdownPaths[1].write(postText(
+            filename: filenameOlder,
+            title: "Actually older",
+            date: "2000-01-01 00:00:00"
+        ))
+        try TextBundleify.start(in: PathHelper.postFolderPath, pathToAssets: nil)
+
+        let posts = try FeedOutput.postsToGenerate(for: .fullText)
+
+        XCTAssertEqual(posts.first?.title, "Actually newer")
+    }
+}
+
+private func postText(filename: String, title: String, date: String) -> String {
+    """
+    ---
+    filename: \(filename)
+    layout: post
+    title: \(title)
+    date: '\(date)'
+    ---
+    Test content.
+    """
 }

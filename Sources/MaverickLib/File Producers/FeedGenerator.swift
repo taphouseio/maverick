@@ -62,7 +62,21 @@ public struct FeedOutput: Sendable {
         var posts = [Post]()
         for path in paths {
             guard posts.count < site.feedSize else { break }
-            guard let postPath = PostPath(path: path) else { break }
+            guard let postPath = PostPath(path: path) else { continue }
+            posts.append(try controller.fetchPost(withPath: postPath, outputtingFor: outputType))
+        }
+
+        return posts.sorted(by: { $0.date > $1.date })
+    }
+
+    public static func allPosts(for outputType: TextOutputType) throws -> [Post] {
+        let site = try SiteConfigController.fetchSite()
+        let paths = try PathHelper.pathsForAllPosts()
+        let controller = PostController(site: site)
+
+        var posts = [Post]()
+        for path in paths {
+            guard let postPath = PostPath(path: path) else { continue }
             let post = try controller.fetchPost(withPath: postPath, outputtingFor: outputType)
             posts.append(post)
         }

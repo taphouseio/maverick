@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PostPath: Codable, Comparable {
+public struct PostPath: Codable, Comparable, Sendable {
     public let year: Int
     public let month: Int
     public let day: Int

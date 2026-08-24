@@ -10,7 +10,7 @@ import Foundation
 public typealias Tag = String
 
 /// Metadata about a post
-public struct FrontMatter: Codable {
+public struct FrontMatter: Codable, Sendable {
     /// The date format used in all content
     nonisolated(unsafe) public static let dateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()

@@ -10,18 +10,20 @@ import Foundation
 public typealias Markdown = String
 
 /// A basic container for an unformatted post.
-public struct BasePost {
+public struct BasePost: Sendable {
     public let frontMatter: FrontMatter
     public let content: Markdown
+    public let broadcastMetadata: BroadcastMetadata?
 
-    public init(frontMatter: FrontMatter, content: Markdown) {
+    public init(frontMatter: FrontMatter, content: Markdown, broadcastMetadata: BroadcastMetadata? = nil) {
         self.frontMatter = frontMatter
         self.content = content
+        self.broadcastMetadata = broadcastMetadata
     }
 }
 
 /// A formatted post, ready to be sent wherever it needs to go (the website or as a generated feed item)
-public struct Post: Codable {
+public struct Post: Codable, Sendable {
     static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -39,8 +41,10 @@ public struct Post: Codable {
     public let frontMatter: FrontMatter
     public let path: PostPath?
     public let shortDescription: String?
+    public let broadcastMetadata: BroadcastMetadata?
 
-    public init(url: String, title: String?, content: String, frontMatter: FrontMatter, path: PostPath?)
+    public init(url: String, title: String?, content: String, frontMatter: FrontMatter, path: PostPath?,
+                broadcastMetadata: BroadcastMetadata? = nil)
     {
         self.date = frontMatter.date
         self.formattedDate = Post.dateFormatter.string(from: frontMatter.date)
@@ -51,5 +55,6 @@ public struct Post: Codable {
         self.frontMatter = frontMatter
         self.path = path
         self.shortDescription = frontMatter.shortDescription
+        self.broadcastMetadata = broadcastMetadata
     }
 }
