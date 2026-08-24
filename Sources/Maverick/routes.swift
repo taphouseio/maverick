@@ -8,6 +8,10 @@ import Vapor
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 func registerRoutes(_ app: Application) throws {
+    app.get("health") { _ in
+        "OK"
+    }
+
     let config = try SiteConfigController.fetchSite()
     try app.register(collection: MicropubRouteHandler(config: MicropubHelper.makeConfig(fromSite: config)))
     try app.register(collection: StaticPageRouter(siteConfig: config))
