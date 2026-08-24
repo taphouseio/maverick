@@ -1,7 +1,11 @@
+# syntax=docker/dockerfile:1
+
 # ================================
 # Build image
 # ================================
 FROM swift:6.2-noble AS build
+
+ARG TARGETARCH
 
 # Install OS updates
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -17,33 +21,27 @@ WORKDIR /build
 # as long as your Package.swift/Package.resolved
 # files do not change.
 COPY ./Package.* ./
-RUN swift package resolve \
+RUN --mount=type=cache,id=maverick-swift-build-${TARGETARCH},target=/build/.build \
+    swift package resolve \
         $([ -f ./Package.resolved ] && echo "--force-resolved-versions" || true)
 
-# Copy entire repo into container
-COPY . .
+# SwiftPM validates declared test-target paths even when building a production
+# product, so include tests in the small context without compiling them.
+COPY ./Sources ./Sources
+COPY ./Tests ./Tests
 
-# Build everything, with optimizations, with static linking, and using jemalloc
-RUN swift build -c release \
-                --static-swift-stdlib \
-                -Xlinker -ljemalloc
-
-# Switch to the staging area
-WORKDIR /staging
-
-# Copy main executable to staging area
-RUN cp "$(swift build --package-path /build -c release --show-bin-path)/Maverick" ./
-
-# Copy static swift backtracer binary to staging area
-RUN cp "/usr/libexec/swift/linux/swift-backtrace-static" ./
-
-# Copy resources bundled by SPM to staging area
-RUN find -L "$(swift build --package-path /build -c release --show-bin-path)/" -regex '.*\.resources$' -exec cp -Ra {} ./ \; || true
-
-# Copy any resources from the public directory and views directory if the directories exist
-# Ensure that by default, neither the directory nor any of its contents are writable.
-RUN [ -d /build/Public ] && { mv /build/Public ./Public && chmod -R a-w ./Public; } || true
-RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w ./Resources; } || true
+# Build with the SwiftPM output cached outside the image layer. Copy every
+# runtime artifact into /staging during the same mount so it remains available
+# after the cache mount is detached.
+RUN --mount=type=cache,id=maverick-swift-build-${TARGETARCH},target=/build/.build \
+    swift build -c release \
+        --static-swift-stdlib \
+        -Xlinker -ljemalloc \
+    && bin_path="$(swift build --package-path /build -c release --show-bin-path)" \
+    && mkdir -p /staging \
+    && cp "$bin_path/Maverick" /staging/ \
+    && cp "/usr/libexec/swift/linux/swift-backtrace-static" /staging/ \
+    && find -L "$bin_path" -regex '.*\.resources$' -exec cp -Ra {} /staging/ \;
 
 # ================================
 # Run image
