@@ -43,6 +43,10 @@ run = "bash mise/scripts/release.sh"
 description = "Build Docker image. Usage: mise run docker-build [VERSION]"
 run = "bash mise/scripts/docker-build.sh"
 
+[tasks.docker-smoke-test]
+description = "Verify the production image. Usage: mise run docker-smoke-test [IMAGE]"
+run = "bash mise/scripts/docker-smoke-test.sh"
+
 [tasks.container-build]
 description = "Build the production image locally with Apple Container. Usage: mise run container-build [VERSION]"
 run = "bash mise/scripts/container-build.sh"
