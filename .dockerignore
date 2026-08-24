@@ -1,6 +1,7 @@
-/_dev
-/authorizations
-/.build
-/nginx
-/Public
-/tools
+*
+!Package.swift
+!Package.resolved
+!Sources/
+!Sources/**
+!Tests/
+!Tests/**

@@ -332,7 +332,8 @@ public actor Coordinator {
                 source: post,
                 text: text,
                 renderedTextHash: textHash,
-                idempotencyKey: idempotencyKey
+                idempotencyKey: idempotencyKey,
+                generation: delivery.generation
             )
             let result = try await provider.send(prepared, connection: ledger?.connections[provider.id])
             delivery.status = .delivered

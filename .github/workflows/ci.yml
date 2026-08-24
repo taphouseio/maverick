@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   macos:
     name: Swift package (macOS)
@@ -26,9 +30,6 @@ jobs:
       - name: Run tests
         run: swift test --no-parallel
 
-      - name: Build release
-        run: swift build -c release
-
   linux:
     name: Swift package (Linux)
     runs-on: ubuntu-latest
@@ -46,29 +47,20 @@ jobs:
       - name: Run tests
         run: swift test --no-parallel
 
-      - name: Build release
-        run: swift build -c release
-
   container:
     name: Production container
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, X64]
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build production image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64
-          load: true
-          tags: maverick:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        env:
+          DOCKER_BUILDKIT: "1"
+          BUILDKIT_PROGRESS: plain
+        run: docker build --platform linux/amd64 --tag maverick:ci .
 
       - name: Verify production image
         run: bash mise/scripts/docker-smoke-test.sh maverick:ci

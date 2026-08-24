@@ -115,7 +115,11 @@ public struct BlueskyProvider: Provider {
     public func send(_ post: PreparedPost, connection: ProviderConnection?) async throws -> DeliveryResult {
         let session = try await session()
         let pds = session.pdsURL ?? serviceURL
-        let rkey = String(post.idempotencyKey.prefix(24))
+        let rkey = BlueskyTID.make(
+            publicationDate: post.source.publicationDate,
+            generation: post.generation,
+            idempotencyKey: post.idempotencyKey
+        )
         let record = Record(
             type: "app.bsky.feed.post",
             text: post.text,
@@ -210,12 +214,34 @@ public struct BlueskyProvider: Provider {
         return [Facet(index: .init(byteStart: byteStart, byteEnd: byteEnd), features: [.init(uri: value)])]
     }
 
-    private static func sha256(_ value: String) -> String {
-        SHA256.hash(data: Data(value.utf8)).map { String(format: "%02x", $0) }.joined()
-    }
-
     private static func iso8601(_ date: Date) -> String {
         ISO8601DateFormatter().string(from: date)
+    }
+}
+
+enum BlueskyTID {
+    private static let alphabet = Array("234567abcdefghijklmnopqrstuvwxyz")
+    private static let maximumTimestamp = (UInt64(1) << 53) - 1
+
+    static func make(publicationDate: Date, generation: UInt64, idempotencyKey: String) -> String {
+        let timestamp = timestampMicroseconds(publicationDate)
+        let generationOffset = min(generation, maximumTimestamp - timestamp)
+        let digest = Array(SHA256.hash(data: Data(idempotencyKey.utf8)))
+        let clockIdentifier = (UInt64(digest[0]) << 2 | UInt64(digest[1]) >> 6) & 0x3ff
+        var value = ((timestamp + generationOffset) << 10) | clockIdentifier
+        var encoded = [Character](repeating: "2", count: 13)
+
+        for index in stride(from: encoded.index(before: encoded.endIndex), through: encoded.startIndex, by: -1) {
+            encoded[index] = alphabet[Int(value & 0x1f)]
+            value >>= 5
+        }
+        return String(encoded)
+    }
+
+    private static func timestampMicroseconds(_ date: Date) -> UInt64 {
+        let value = date.timeIntervalSince1970 * 1_000_000
+        guard value.isFinite, value > 0 else { return 0 }
+        return UInt64(min(value.rounded(.down), Double(maximumTimestamp)))
     }
 }
 
